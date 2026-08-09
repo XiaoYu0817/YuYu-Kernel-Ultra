@@ -18,6 +18,12 @@ jobs:
       - name: Setup environment
         uses: ./.github/actions/setup
 
+      - name: Fetch missing submodules from upstream
+        run: |
+          git clone --depth 1 --recurse-submodules https://github.com/topjohnwu/Magisk.git /tmp/magisk-upstream
+          rsync -a --delete /tmp/magisk-upstream/native/src/external/ native/src/external/
+          rm -rf /tmp/magisk-upstream
+
       - name: Restore keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
