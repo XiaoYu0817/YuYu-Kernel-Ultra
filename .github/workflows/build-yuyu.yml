@@ -10,19 +10,37 @@ jobs:
     name: Build APK
     runs-on: ubuntu-24.04
     steps:
-      - name: Check out
+      - name: Check out (to grab customization files)
         uses: actions/checkout@v6
-        with:
-          submodules: "recursive"
+
+      - name: Stash customization files
+        run: |
+          mkdir -p /tmp/customize
+          cp app/core/src/main/res/drawable-nodpi/ic_yuyu_icon.png /tmp/customize/
+          cp app/core/src/main/res/drawable-v26/ic_launcher.xml /tmp/customize/
+          cp app/apk-ng/src/main/java/com/topjohnwu/magisk/ui/MagiskTheme.kt /tmp/customize/
+
+      - name: Wipe workspace
+        run: |
+          shopt -s dotglob
+          rm -rf ${{ github.workspace }}/*
+
+      - name: Clone clean upstream Magisk (with submodules)
+        run: git clone --recurse-submodules https://github.com/topjohnwu/Magisk.git ${{ github.workspace }}
+
+      - name: Apply YuYu customizations
+        run: |
+          set -e
+          sed -i 's/com\.topjohnwu\.magisk"/org.yuyuultra.magisk.user"/g' app/build-logic/src/main/java/Setup.kt
+          sed -i 's/android:label="Magisk"/android:label="YuYu Kernel Ultra"/' app/shared/src/main/AndroidManifest.xml
+          sed -i 's/#00AF9C/#FF91D5FF/' app/core/src/main/res/values/colors.xml
+          sed -i 's#@drawable/ic_magisk_padded#@drawable/ic_yuyu_icon#g' app/core/src/main/res/values/themes.xml app/core/src/main/res/values-v31/themes.xml
+          cp /tmp/customize/ic_yuyu_icon.png app/core/src/main/res/drawable-nodpi/ic_yuyu_icon.png
+          cp /tmp/customize/ic_launcher.xml app/core/src/main/res/drawable-v26/ic_launcher.xml
+          cp /tmp/customize/MagiskTheme.kt app/apk-ng/src/main/java/com/topjohnwu/magisk/ui/MagiskTheme.kt
 
       - name: Setup environment
         uses: ./.github/actions/setup
-
-      - name: Fetch missing submodules from upstream
-        run: |
-          git clone --depth 1 --recurse-submodules https://github.com/topjohnwu/Magisk.git /tmp/magisk-upstream
-          rsync -a --delete /tmp/magisk-upstream/native/src/external/ native/src/external/
-          rm -rf /tmp/magisk-upstream
 
       - name: Restore keystore
         env:
