@@ -36,6 +36,7 @@ jobs:
           sed -i 's/#00AF9C/#FF91D5FF/' app/core/src/main/res/values/colors.xml
           sed -i 's#@drawable/ic_magisk_padded#@drawable/ic_yuyu_icon#g' app/core/src/main/res/values/themes.xml app/core/src/main/res/values-v31/themes.xml
           sed -i 's/Magisk/YuYu Kernel Ultra/g' app/core/src/main/res/values/strings.xml
+          mkdir -p app/core/src/main/res/drawable-nodpi
           cp /tmp/customize/ic_yuyu_icon.png app/core/src/main/res/drawable-nodpi/ic_yuyu_icon.png
           cp /tmp/customize/ic_launcher.xml app/core/src/main/res/drawable-v26/ic_launcher.xml
           cp /tmp/customize/MagiskTheme.kt app/apk-ng/src/main/java/com/topjohnwu/magisk/ui/MagiskTheme.kt
