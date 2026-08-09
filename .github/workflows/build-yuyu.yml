@@ -1,0 +1,50 @@
+name: Build YuYu Kernel Ultra
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out
+        uses: actions/checkout@v6
+        with:
+          submodules: "recursive"
+
+      - name: Setup environment
+        uses: ./.github/actions/setup
+
+      - name: Restore keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE_BASE64" | base64 -d > yuyu-release.jks
+
+      - name: Write signing config
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          cat > config.prop << EOC
+          keyStore=yuyu-release.jks
+          keyStorePass=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPass=$KEY_PASSWORD
+          EOC
+
+      - name: Build release
+        run: ./build.py -vr all
+
+      - name: Stop gradle daemon
+        run: ./app/gradlew --stop
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: yuyu-kernel-ultra-${{ github.sha }}
+          path: out
+          compression-level: 9
