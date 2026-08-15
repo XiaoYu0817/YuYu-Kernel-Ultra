@@ -54,6 +54,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -245,6 +246,10 @@ fun HomeScreen(viewModel: HomeViewModel, installVm: InstallViewModel) {
     }
 
     if (showAgreementDialog) {
+        val agreementScrollState = rememberScrollState()
+        val canAgree by remember {
+            derivedStateOf { agreementScrollState.value >= agreementScrollState.maxValue }
+        }
         AlertDialog(
             onDismissRequest = { },
             title = { Text(stringResource(CoreR.string.yuyu_agreement_title)) },
@@ -252,7 +257,7 @@ fun HomeScreen(viewModel: HomeViewModel, installVm: InstallViewModel) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .verticalScroll(rememberScrollState())
+                        .verticalScroll(agreementScrollState)
                 ) {
                     Text(
                         text = stringResource(CoreR.string.yuyu_agreement_content),
@@ -261,10 +266,13 @@ fun HomeScreen(viewModel: HomeViewModel, installVm: InstallViewModel) {
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
-                    Config.yuyuAgreementAccepted = true
-                    showAgreementDialog = false
-                }) {
+                TextButton(
+                    enabled = canAgree,
+                    onClick = {
+                        Config.yuyuAgreementAccepted = true
+                        showAgreementDialog = false
+                    }
+                ) {
                     Text(stringResource(CoreR.string.yuyu_agree_yes))
                 }
             },
