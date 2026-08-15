@@ -24,7 +24,6 @@ impl MagiskInit {
                 fstab_suffix: [0; 32],
                 hardware: [0; 32],
                 hardware_plat: [0; 32],
-                boot_mode: [0; 16],
                 partition_map: Vec::new(),
             },
         }
@@ -88,8 +87,8 @@ impl MagiskInit {
         self.patch_rw_root();
     }
 
-    fn recovery_or_charger(&self) {
-        info!("Charger mode or ramdisk is recovery, abort");
+    fn recovery(&self) {
+        info!("Ramdisk is recovery, abort");
         self.restore_ramdisk_init();
         cstr!("/.backup").remove_all().ok();
     }
@@ -152,11 +151,8 @@ impl MagiskInit {
             self.legacy_system_as_root();
         } else if self.config.force_normal_boot {
             self.first_stage();
-        } else if cstr!("/sbin/recovery").exists()
-            || cstr!("/system/bin/recovery").exists()
-            || unsafe { CStr::from_ptr(self.config.boot_mode.as_ptr()) } == c"charger"
-        {
-            self.recovery_or_charger();
+        } else if cstr!("/sbin/recovery").exists() || cstr!("/system/bin/recovery").exists() {
+            self.recovery();
         } else if self.check_two_stage() {
             self.first_stage();
         } else {

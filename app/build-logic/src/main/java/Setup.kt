@@ -277,7 +277,7 @@ fun Project.setupMainApk() {
         namespace = "com.topjohnwu.magisk"
 
         defaultConfig {
-            applicationId = "com.topjohnwu.magisk"
+            applicationId = "io.github.vvb2060.magisk"
             vectorDrawables.useSupportLibrary = true
             versionName = Config.version
             versionCode = Config.versionCode

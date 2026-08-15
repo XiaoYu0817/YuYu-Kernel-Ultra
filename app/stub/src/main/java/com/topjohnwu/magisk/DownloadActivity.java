@@ -43,7 +43,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class DownloadActivity extends Activity {
 
     private static final String APP_NAME = "Magisk";
-    private static final String RES_PKG_NAME = "com.topjohnwu.magisk";
+    private static final String RES_PKG_NAME = "io.github.vvb2060.magisk";
 
     private boolean dynLoad;
 

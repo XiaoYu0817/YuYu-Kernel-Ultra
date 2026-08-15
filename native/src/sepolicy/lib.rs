@@ -1,3 +1,5 @@
+#![feature(try_blocks)]
+
 pub use base;
 use std::fmt::Write;
 
@@ -13,7 +15,6 @@ mod statement;
 
 #[cxx::bridge]
 pub mod ffi {
-    #[derive(Debug, PartialEq)]
     struct Xperm {
         low: u16,
         high: u16,

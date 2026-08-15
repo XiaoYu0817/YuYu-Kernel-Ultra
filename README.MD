@@ -6,6 +6,10 @@
 
 ## Introduction
 
+**YuYu Kernel Ultra (Alpha)** is a custom distribution of Magisk based on the **Magisk-Alpha** branch (maintained by vvb2060, a non-official experimental fork of Magisk), compiled and customized by XiaoYu0817 (小瑜).
+
+> This is **NOT** the official Magisk. It is an Alpha-branch derivative with additional customizations. Use at your own risk.
+
 Magisk is a suite of open source software for customizing Android, supporting devices higher than Android 6.0.<br>
 Some highlight features:
 
@@ -16,7 +20,7 @@ Some highlight features:
 
 ## Downloads
 
-[Github](https://github.com/topjohnwu/Magisk/releases) is the only source where you can get official Magisk information and downloads.
+[Github](https://github.com/topjohnwu/Magisk/releases) is the only source where you can get official Magisk information and downloads. This Alpha distribution is provided by the project maintainer and is not affiliated with official Magisk.
 
 ## Useful Links
 

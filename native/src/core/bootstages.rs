@@ -82,7 +82,7 @@ impl MagiskD {
         Command::new(&tmp_bb)
             .arg("--install")
             .arg("-s")
-            .arg(tmp_bb.parent_dir().unwrap_or_default())
+            .arg(tmp_bb.parent_dir().unwrap())
             .stdout(Stdio::null())
             .stderr(Stdio::null())
             .status()
@@ -186,22 +186,22 @@ impl MagiskD {
         setup_preinit_dir();
         self.ensure_manager();
         if self.zygisk_enabled.load(Ordering::Relaxed) {
-            self.zygisk.lock().reset(true);
+            self.zygisk.lock().unwrap().reset(true);
         }
     }
 
     pub fn boot_stage_handler(&self, client: UnixStream, code: RequestCode) {
         // Make sure boot stage execution is always serialized
-        let mut state = self.boot_stage_lock.lock();
+        let mut state = self.boot_stage_lock.lock().unwrap();
 
         match code {
-            RequestCode::POST_FS_DATA
-                if check_data() && !state.contains(BootState::PostFsDataDone) =>
-            {
-                if self.post_fs_data() {
-                    state.insert(BootState::SafeMode);
+            RequestCode::POST_FS_DATA => {
+                if check_data() && !state.contains(BootState::PostFsDataDone) {
+                    if self.post_fs_data() {
+                        state.insert(BootState::SafeMode);
+                    }
+                    state.insert(BootState::PostFsDataDone);
                 }
-                state.insert(BootState::PostFsDataDone);
             }
             RequestCode::LATE_START => {
                 drop(client);

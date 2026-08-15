@@ -31,9 +31,8 @@ use std::io::{BufReader, Write};
 use std::os::fd::{AsFd, AsRawFd, IntoRawFd, RawFd};
 use std::os::unix::net::{UCred, UnixListener, UnixStream};
 use std::process::{Command, exit};
-use std::sync::OnceLock;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::nonpoison::Mutex;
+use std::sync::{Mutex, OnceLock};
 use std::time::Duration;
 
 // Global magiskd singleton
@@ -106,7 +105,7 @@ impl MagiskD {
                 denylist_handler(-1);
 
                 // Restore native bridge property
-                self.zygisk.lock().restore_prop();
+                self.zygisk.lock().unwrap().restore_prop();
 
                 client.write_pod(&0).log_ok();
 
@@ -130,7 +129,7 @@ impl MagiskD {
                 self.prune_su_access();
                 scan_deny_apps();
                 if self.zygisk_enabled.load(Ordering::Relaxed) {
-                    self.zygisk.lock().reset(false);
+                    self.zygisk.lock().unwrap().reset(false);
                 }
             }
             RequestCode::SQLITE_CMD => {
@@ -226,21 +225,25 @@ impl MagiskD {
             | RequestCode::ZYGOTE_RESTART
             | RequestCode::SQLITE_CMD
             | RequestCode::DENYLIST
-            | RequestCode::STOP_DAEMON
-                if !is_root =>
-            {
-                client.write_pod(&RespondCode::ROOT_REQUIRED.repr).log_ok();
-                return;
+            | RequestCode::STOP_DAEMON => {
+                if !is_root {
+                    client.write_pod(&RespondCode::ROOT_REQUIRED.repr).log_ok();
+                    return;
+                }
             }
-            RequestCode::REMOVE_MODULES if !is_root && !is_shell => {
-                // Only allow root and ADB shell to remove modules
-                client.write_pod(&RespondCode::ACCESS_DENIED.repr).log_ok();
-                return;
+            RequestCode::REMOVE_MODULES => {
+                if !is_root && !is_shell {
+                    // Only allow root and ADB shell to remove modules
+                    client.write_pod(&RespondCode::ACCESS_DENIED.repr).log_ok();
+                    return;
+                }
             }
-            RequestCode::ZYGISK if !is_zygote => {
-                // Invalid client context
-                client.write_pod(&RespondCode::ACCESS_DENIED.repr).log_ok();
-                return;
+            RequestCode::ZYGISK => {
+                if !is_zygote {
+                    // Invalid client context
+                    client.write_pod(&RespondCode::ACCESS_DENIED.repr).log_ok();
+                    return;
+                }
             }
             _ => {}
         }

@@ -1,8 +1,7 @@
 use base::{ResultExt, new_daemon_thread};
 use nix::sys::signal::SigSet;
 use nix::unistd::{getpid, gettid};
-use std::sync::LazyLock;
-use std::sync::nonpoison::{Condvar, Mutex};
+use std::sync::{Condvar, LazyLock, Mutex, WaitTimeoutResult};
 use std::time::Duration;
 
 static THREAD_POOL: LazyLock<ThreadPool> = LazyLock::new(ThreadPool::default);
@@ -34,15 +33,17 @@ impl ThreadPool {
 
             let task: Option<Box<dyn FnOnce() + Send>>;
             {
-                let mut info = self.info.lock();
+                let mut info = self.info.lock().unwrap();
                 info.idle_threads += 1;
                 if info.task.is_none() {
                     if is_core_pool {
                         // Core pool never closes, wait forever.
-                        self.task_is_some.wait(&mut info);
+                        info = self.task_is_some.wait(info).unwrap();
                     } else {
                         let dur = Duration::from_secs(THREAD_IDLE_MAX_SEC);
-                        if self.task_is_some.wait_timeout(&mut info, dur).timed_out() {
+                        let result: WaitTimeoutResult;
+                        (info, result) = self.task_is_some.wait_timeout(info, dur).unwrap();
+                        if result.timed_out() {
                             // Terminate thread after timeout
                             info.idle_threads -= 1;
                             info.total_threads -= 1;
@@ -71,10 +72,10 @@ impl ThreadPool {
             0
         }
 
-        let mut info = self.info.lock();
+        let mut info = self.info.lock().unwrap();
         while info.task.is_some() {
             // Wait until task is none
-            self.task_is_none.wait(&mut info);
+            info = self.task_is_none.wait(info).unwrap();
         }
         info.task = Some(Box::new(f));
         if info.idle_threads == 0 {

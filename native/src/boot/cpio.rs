@@ -74,19 +74,19 @@ struct Exists {
 #[derive(FromArgs)]
 #[argh(subcommand, name = "backup")]
 struct Backup {
-    #[argh(switch, short = 'n')]
-    skip_compress: bool,
     #[argh(positional, arg_name = "orig")]
     origin: String,
+    #[argh(switch, short = 'n')]
+    skip_compress: bool,
 }
 
 #[derive(FromArgs)]
 #[argh(subcommand, name = "rm")]
 struct Remove {
-    #[argh(switch, short = 'r')]
-    recursive: bool,
     #[argh(positional, arg_name = "entry")]
     path: String,
+    #[argh(switch, short = 'r')]
+    recursive: bool,
 }
 
 #[derive(FromArgs)]
@@ -137,10 +137,10 @@ struct Add {
 #[derive(FromArgs)]
 #[argh(subcommand, name = "ls")]
 struct List {
-    #[argh(switch, short = 'r')]
-    recursive: bool,
     #[argh(positional, default = r#"String::from("/")"#)]
     path: String,
+    #[argh(switch, short = 'r')]
+    recursive: bool,
 }
 
 pub(crate) fn print_cpio_usage() {
@@ -484,9 +484,10 @@ impl Cpio {
         };
         for (name, entry) in &self.entries {
             let p = "/".to_string() + name.as_str();
-            let Some(p) = p.strip_prefix(&path) else {
+            if !p.starts_with(&path) {
                 continue;
-            };
+            }
+            let p = p.strip_prefix(&path).unwrap();
             if !p.is_empty() && !p.starts_with('/') {
                 continue;
             }
@@ -613,11 +614,8 @@ impl Cpio {
         o.rm(".backup", true);
         self.rm(".backup", true);
 
-        let mut left_iter = o.entries.into_iter();
-        let mut right_iter = self.entries.iter();
-
-        let mut lhs = left_iter.next();
-        let mut rhs = right_iter.next();
+        let mut lhs = o.entries.into_iter().peekable();
+        let mut rhs = self.entries.iter().peekable();
 
         loop {
             enum Action<'a> {
@@ -625,38 +623,32 @@ impl Cpio {
                 Record(&'a String),
                 Noop,
             }
-
-            // Move the iterator forward if needed
-            if lhs.is_none() {
-                lhs = left_iter.next();
-            }
-            if rhs.is_none() {
-                rhs = right_iter.next();
-            }
-
-            let action = match (lhs.take(), rhs.take()) {
-                (Some((ln, le)), Some((rn, re))) => match ln.as_str().cmp(rn.as_str()) {
+            let action = match (lhs.peek(), rhs.peek()) {
+                (Some((l, _)), Some((r, re))) => match l.as_str().cmp(r.as_str()) {
                     Ordering::Less => {
-                        // Put rhs back
-                        rhs = Some((rn, re));
-                        Action::Backup(ln, le)
+                        let (l, le) = lhs.next().unwrap();
+                        Action::Backup(l, le)
                     }
-                    Ordering::Greater => {
-                        // Put lhs back
-                        lhs = Some((ln, le));
-                        Action::Record(rn)
-                    }
+                    Ordering::Greater => Action::Record(rhs.next().unwrap().0),
                     Ordering::Equal => {
-                        if re.data != le.data {
-                            Action::Backup(ln, le)
+                        let (l, le) = lhs.next().unwrap();
+                        let action = if re.data != le.data {
+                            Action::Backup(l, le)
                         } else {
                             Action::Noop
-                        }
+                        };
+                        rhs.next();
+                        action
                     }
                 },
-                (Some((ln, le)), None) => Action::Backup(ln, le),
-                (None, Some((rn, _))) => Action::Record(rn),
-                (None, None) => break,
+                (Some(_), None) => {
+                    let (l, le) = lhs.next().unwrap();
+                    Action::Backup(l, le)
+                }
+                (None, Some(_)) => Action::Record(rhs.next().unwrap().0),
+                (None, None) => {
+                    break;
+                }
             };
             match action {
                 Action::Backup(name, mut entry) => {
@@ -699,11 +691,11 @@ impl CpioEntry {
         if self.mode & S_IFMT != S_IFREG {
             return false;
         }
-        let Ok(data) = || -> std::io::Result<Vec<u8>> {
-            let mut encoder = get_encoder(FileFormat::XZ, Vec::new())?;
+        let mut encoder = get_encoder(FileFormat::XZ, Vec::new());
+        let Ok(data): std::io::Result<Vec<u8>> = (try {
             encoder.write_all(&self.data)?;
-            encoder.finish()
-        }() else {
+            encoder.finish()?
+        }) else {
             eprintln!("xz compression failed");
             return false;
         };
@@ -717,12 +709,12 @@ impl CpioEntry {
             return false;
         }
 
-        let Ok(data) = || -> std::io::Result<Vec<u8>> {
-            let mut decoder = get_decoder(FileFormat::XZ, Cursor::new(&self.data))?;
+        let Ok(data): std::io::Result<Vec<u8>> = (try {
+            let mut decoder = get_decoder(FileFormat::XZ, Cursor::new(&self.data));
             let mut data = Vec::new();
             std::io::copy(decoder.as_mut(), &mut data)?;
-            Ok(data)
-        }() else {
+            data
+        }) else {
             eprintln!("xz compression failed");
             return false;
         };

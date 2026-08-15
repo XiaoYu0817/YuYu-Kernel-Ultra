@@ -889,7 +889,7 @@ impl MagiskD {
 
         // Handle zygisk
         if self.zygisk_enabled.load(Ordering::Acquire) {
-            let mut zygisk = self.zygisk.lock();
+            let mut zygisk = self.zygisk.lock().unwrap();
             zygisk.set_prop();
             inject_zygisk_bins(&zygisk.lib_name, &mut system);
         }

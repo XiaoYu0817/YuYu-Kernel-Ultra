@@ -7,9 +7,6 @@ edition.workspace = true
 crate-type = ["staticlib"]
 path = "lib.rs"
 
-[lints]
-workspace = true
-
 [build-dependencies]
 cxx-gen = { workspace = true }
 pb-rs = { workspace = true }
@@ -36,4 +33,4 @@ flate2 = { workspace = true, features = ["zlib-rs"] }
 bzip2 = { workspace = true }
 lz4 = { workspace = true }
 lzma-rust2 = { workspace = true, features = ["xz", "std", "encoder", "optimization"] }
-zopfli = { workspace = true, features = ["std", "gzip"] }
+zopfli = { workspace = true, features = ["gzip"] }

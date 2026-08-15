@@ -132,9 +132,13 @@ impl PositionalArgParser<'_> {
     }
 
     fn ensure_end(&mut self) -> Result<(), EarlyExit> {
-        match self.0.next() {
-            None => Ok(()),
-            Some(s) => Err(EarlyExit::from(format!("Unrecognized argument: {s}\n"))),
+        if self.0.len() == 0 {
+            Ok(())
+        } else {
+            Err(EarlyExit::from(format!(
+                "Unrecognized argument: {}\n",
+                self.0.next().unwrap()
+            )))
         }
     }
 }

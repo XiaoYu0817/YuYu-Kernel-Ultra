@@ -53,19 +53,6 @@ static bool check_env(const char *name) {
     return val != nullptr && val == "true"sv;
 }
 
-static bool guess_lzma(const uint8_t *buf, size_t len) {
-    // 0     : (pb * 5 + lp) * 9 + lc
-    // 1 - 4 : dict size, must be 2^n
-    // 5 - 12: all 0xFF
-    if (len <= 13) return false;
-    if (memcmp(buf, "\x5d", 1) != 0) return false;
-    uint32_t dict_sz = 0;
-    memcpy(&dict_sz, buf + 1, sizeof(dict_sz));
-    if (dict_sz == 0 || (dict_sz & (dict_sz - 1)) != 0) return false;
-    if (memcmp(buf + 5, "\xff\xff\xff\xff\xff\xff\xff\xff", 8) != 0) return false;
-    return true;
-}
-
 FileFormat check_fmt(const void *buf, size_t len) {
     if (CHECKED_MATCH(CHROMEOS_MAGIC)) {
         return FileFormat::CHROMEOS;
@@ -79,7 +66,8 @@ FileFormat check_fmt(const void *buf, size_t len) {
         return FileFormat::LZOP;
     } else if (CHECKED_MATCH(XZ_MAGIC)) {
         return FileFormat::XZ;
-    } else if (guess_lzma(static_cast<const uint8_t *>(buf), len)) {
+    } else if (len >= 13 && memcmp(buf, "\x5d\x00\x00", 3) == 0
+            && (((char *)buf)[12] == '\xff' || ((char *)buf)[12] == '\x00')) {
         return FileFormat::LZMA;
     } else if (CHECKED_MATCH(BZIP_MAGIC)) {
         return FileFormat::BZIP2;
@@ -292,7 +280,7 @@ static int find_dtb_offset(const uint8_t *buf, unsigned sz) {
         auto fdt_hdr = reinterpret_cast<const fdt_header *>(curr);
 
         // Check that fdt_header.totalsize does not overflow kernel image size or is empty dtb
-        // https://github.com/torvalds/linux/commit/7b937cc243e5b1df8780a0aa743ce800df6c68d1
+		// https://github.com/torvalds/linux/commit/7b937cc243e5b1df8780a0aa743ce800df6c68d1
         uint32_t totalsize = fdt_hdr->totalsize;
         if (totalsize > end - curr || totalsize <= 0x48)
             continue;
@@ -611,9 +599,7 @@ bool boot_img::parse_image(const uint8_t *addr, FileFormat type) {
 int split_image_dtb(Utf8CStr filename, bool skip_decomp) {
     mmap_data img(filename.c_str());
 
-    if (int offset = find_dtb_offset(img.data(), img.size()); offset > 0) {
-        size_t off = (size_t) offset;
-
+    if (size_t off = find_dtb_offset(img.data(), img.size()); off > 0) {
         FileFormat fmt = check_fmt_lg(img.data(), img.size());
         if (!skip_decomp && fmt_compressed(fmt)) {
             int fd = creat(KERNEL_FILE, 0644);
@@ -915,6 +901,8 @@ void repack(Utf8CStr src_img, Utf8CStr out_img, bool skip_comp) {
         file_align();
     }
 
+    off.tail = lseek(fd, 0, SEEK_CUR);
+
     // Proprietary stuffs
     if (boot.flags[SEANDROID_FLAG]) {
         xwrite(fd, SEANDROID_MAGIC, 16);
@@ -925,7 +913,6 @@ void repack(Utf8CStr src_img, Utf8CStr out_img, bool skip_comp) {
         xwrite(fd, LG_BUMP_MAGIC, 16);
     }
 
-    off.tail = lseek(fd, 0, SEEK_CUR);
     file_align();
 
     // vbmeta
@@ -1019,35 +1006,9 @@ void repack(Utf8CStr src_img, Utf8CStr out_img, bool skip_comp) {
         memcpy(footer, boot.avb_footer, sizeof(AvbFooter));
         footer->original_image_size = __builtin_bswap64(aosp_img_size);
         footer->vbmeta_offset = __builtin_bswap64(off.vbmeta);
-
-        auto vbmeta = reinterpret_cast<AvbVBMetaImageHeader*>(out.data() + off.vbmeta);
-
         if (check_env("PATCHVBMETAFLAG")) {
+            auto vbmeta = reinterpret_cast<AvbVBMetaImageHeader*>(out.data() + off.vbmeta);
             vbmeta->flags = __builtin_bswap32(3);
-        }
-
-        // Sync hash descriptor image_size with the new AOSP portion size.
-        // Without this, some bootloaders (e.g. Motorola) reject images.
-        for (auto &desc : vbmeta->descriptors()) {
-            if (__builtin_bswap64(desc.tag) != AVB_DESCRIPTOR_TAG_HASH)
-                continue;
-
-            // enforce size limits; protect against adversarial input.
-            size_t buf_remaining = out.data() + out.size() - reinterpret_cast<uint8_t *>(&desc);
-            if (buf_remaining < __builtin_bswap64(desc.num_bytes_following) || buf_remaining - __builtin_bswap64(desc.num_bytes_following) < sizeof(AvbDescriptor)) {
-                // beware: both conditions are necessary because underflow in the subtraction could wrap
-                fprintf(stderr, "AVB hash descriptor num_bytes_following overflows buffer\n");
-                break;
-            }
-
-            if (__builtin_bswap64(desc.num_bytes_following) < sizeof(AvbHashDescriptor) - sizeof(AvbDescriptor)) {
-                fprintf(stderr, "AvbDescriptor too small to hold AvbHashDescriptor\n");
-                break;
-            }
-
-            auto &hd = reinterpret_cast<AvbHashDescriptor &>(desc);
-            hd.image_size = __builtin_bswap64(aosp_img_size);
-            break;
         }
     }
 

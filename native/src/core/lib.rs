@@ -1,11 +1,9 @@
+#![feature(try_blocks)]
 #![feature(fn_traits)]
 #![feature(unix_socket_ancillary_data)]
 #![feature(unix_socket_peek)]
 #![feature(default_field_values)]
 #![feature(peer_credentials_unix_socket)]
-#![feature(sync_nonpoison)]
-#![feature(nonpoison_mutex)]
-#![feature(nonpoison_condvar)]
 #![allow(clippy::missing_safety_doc)]
 
 use crate::ffi::SuRequest;

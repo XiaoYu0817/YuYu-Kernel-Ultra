@@ -1,9 +1,13 @@
+#include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/prctl.h>
 #include <sys/mman.h>
 #include <android/log.h>
-#include <linux/fs.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <syscall.h>
+#include <random>
+#include <string>
 
 #include <base.hpp>
 #include <flags.h>
@@ -14,25 +18,43 @@ using namespace std;
 #define __call_bypassing_fortify(fn) (&fn)
 #endif
 
-#ifdef __LP64__
-static_assert(BLKGETSIZE64 == 0x80081272);
-#else
-static_assert(BLKGETSIZE64 == 0x80041272);
-#endif
+// Override libc++ new implementation to optimize final build size
+
+void* operator new(std::size_t s) { return std::malloc(s); }
+void* operator new[](std::size_t s) { return std::malloc(s); }
+void  operator delete(void *p) { std::free(p); }
+void  operator delete[](void *p) { std::free(p); }
+void* operator new(std::size_t s, const std::nothrow_t&) noexcept { return std::malloc(s); }
+void* operator new[](std::size_t s, const std::nothrow_t&) noexcept { return std::malloc(s); }
+void  operator delete(void *p, const std::nothrow_t&) noexcept { std::free(p); }
+void  operator delete[](void *p, const std::nothrow_t&) noexcept { std::free(p); }
+
+bool byte_view::contains(byte_view pattern) const {
+    return _buf != nullptr && memmem(_buf, _sz, pattern._buf, pattern._sz) != nullptr;
+}
+
+bool byte_view::operator==(byte_view rhs) const {
+    return _sz == rhs._sz && memcmp(_buf, rhs._buf, _sz) == 0;
+}
+
+void byte_data::swap(byte_data &o) {
+    std::swap(_buf, o._buf);
+    std::swap(_sz, o._sz);
+}
 
 rust::Vec<size_t> byte_data::patch(byte_view from, byte_view to) const {
     rust::Vec<size_t> v;
-    if (ptr == nullptr)
+    if (_buf == nullptr)
         return v;
-    auto p = ptr;
-    auto eof = ptr + sz;
+    auto p = _buf;
+    auto eof = _buf + _sz;
     while (p < eof) {
         p = static_cast<uint8_t *>(memmem(p, eof - p, from.data(), from.size()));
         if (p == nullptr)
             return v;
         memset(p, 0, from.size());
         memcpy(p, to.data(), to.size());
-        v.push_back(p - ptr);
+        v.push_back(p - _buf);
         p += from.size();
     }
     return v;
@@ -352,34 +374,30 @@ sFILE make_file(FILE *fp) {
 mmap_data::mmap_data(const char *name, bool rw) {
     auto slice = rust::map_file(name, rw);
     if (!slice.empty()) {
-        this->ptr = slice.data();
-        this->sz = slice.size();
+        _buf = slice.data();
+        _sz = slice.size();
     }
 }
 
 mmap_data::mmap_data(int dirfd, const char *name, bool rw) {
     auto slice = rust::map_file_at(dirfd, name, rw);
     if (!slice.empty()) {
-        this->ptr = slice.data();
-        this->sz = slice.size();
+        _buf = slice.data();
+        _sz = slice.size();
     }
 }
 
 mmap_data::mmap_data(int fd, size_t sz, bool rw) {
     auto slice = rust::map_fd(fd, sz, rw);
     if (!slice.empty()) {
-        this->ptr = slice.data();
-        this->sz = slice.size();
+        _buf = slice.data();
+        _sz = slice.size();
     }
 }
 
 mmap_data::~mmap_data() {
-    if (ptr) munmap(ptr, sz);
-}
-
-void mmap_data::swap(mmap_data &o) {
-    std::swap(ptr, o.ptr);
-    std::swap(sz, o.sz);
+    if (_buf)
+        munmap(_buf, _sz);
 }
 
 string resolve_preinit_dir(const char *base_dir) {
@@ -402,7 +420,7 @@ extern "C" void cxx$utf8str$new(Utf8CStr *self, const void *s, size_t len);
 extern "C" const char *cxx$utf8str$ptr(const Utf8CStr *self);
 extern "C" size_t cxx$utf8str$len(const Utf8CStr *self);
 
-Utf8CStr::Utf8CStr(const char *s, size_t len) : repr{} {
+Utf8CStr::Utf8CStr(const char *s, size_t len) {
     cxx$utf8str$new(this, s, len);
 }
 

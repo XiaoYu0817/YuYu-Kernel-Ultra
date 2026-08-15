@@ -21,7 +21,7 @@ macro_rules! match_patterns {
             let b = $buf.get_unchecked(len..);
             if !b.is_empty() && b[0] == b'=' {
                 for c in b.iter() {
-                    if b" \n,\0".contains(c) {
+                    if b" \n\0".contains(c) {
                         break;
                     }
                     len += 1;
@@ -103,7 +103,7 @@ fn hex2byte(hex: &[u8]) -> Vec<u8> {
 }
 
 pub fn hexpatch(file: &Utf8CStr, from: &Utf8CStr, to: &Utf8CStr) -> bool {
-    let res = || -> LoggedResult<bool> {
+    let res: LoggedResult<bool> = try {
         let mut map = MappedFile::open_rw(file)?;
         let pattern = hex2byte(from.as_bytes());
         let patch = hex2byte(to.as_bytes());
@@ -112,7 +112,7 @@ pub fn hexpatch(file: &Utf8CStr, from: &Utf8CStr, to: &Utf8CStr) -> bool {
         for off in &v {
             eprintln!("Patch @ {off:#010X} [{from}] -> [{to}]");
         }
-        Ok(!v.is_empty())
-    }();
+        !v.is_empty()
+    };
     res.unwrap_or(false)
 }
