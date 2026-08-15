@@ -1,0 +1,201 @@
+name: Build YuYu Kernel Ultra
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out (to grab customization files)
+        uses: actions/checkout@v6
+
+      - name: Stash customization files
+        run: |
+          mkdir -p /tmp/customize
+          if [ -f app/core/src/main/res/drawable-nodpi/ic_yuyu_icon.png ]; then
+            cp app/core/src/main/res/drawable-nodpi/ic_yuyu_icon.png /tmp/customize/
+          else
+            echo "ic_yuyu_icon.png not found, skip backup"
+          fi
+
+          if [ -f app/core/src/main/res/drawable-v26/ic_launcher.xml ]; then
+            cp app/core/src/main/res/drawable-v26/ic_launcher.xml /tmp/customize/
+          else
+            echo "ic_launcher.xml not found, skip backup"
+          fi
+
+          if [ -f app/apk-ng/src/main/java/com/topjohnwu/magisk/ui/MagiskTheme.kt ]; then
+            cp app/apk-ng/src/main/java/com/topjohnwu/magisk/ui/MagiskTheme.kt /tmp/customize/
+          else
+            echo "MagiskTheme.kt not found, skip backup"
+          fi
+
+      - name: Wipe workspace
+        run: |
+          shopt -s dotglob
+          rm -rf ${{ github.workspace }}/*
+
+      - name: Clone clean upstream Magisk (with submodules)
+        run: git clone --recurse-submodules https://github.com/topjohnwu/Magisk.git ${{ github.workspace }}
+
+      - name: Apply YuYu customizations
+        run: |
+          set -e
+          sed -i 's/applicationId = "com\.topjohnwu\.magisk"/applicationId = "org.yuyuultra.magisk.user"/g' app/build-logic/src/main/java/Setup.kt
+          sed -i 's/android:label="Magisk"/android:label="YuYu Kernel Ultra"/' app/shared/src/main/AndroidManifest.xml
+          sed -i 's/#00AF9C/#FF91D5FF/' app/core/src/main/res/values/colors.xml
+          sed -i 's#@drawable/ic_magisk_padded#@drawable/ic_yuyu_icon#g' app/core/src/main/res/values/themes.xml app/core/src/main/res/values-v31/themes.xml
+          python3 -c "
+          import re
+          path = 'app/core/src/main/res/values/strings.xml'
+          with open(path, 'r', encoding='utf-8') as f:
+              content = f.read()
+          def replace_text(m):
+              return m.group(1) + m.group(2).replace('Magisk', 'YuYu Kernel Ultra') + m.group(3)
+          pattern = re.compile(r'(<string[^>]*>)(.*?)(</string>)', re.DOTALL)
+          content = pattern.sub(replace_text, content)
+          with open(path, 'w', encoding='utf-8') as f:
+              f.write(content)
+          "
+          mkdir -p app/core/src/main/res/drawable-nodpi
+          cp /tmp/customize/ic_yuyu_icon.png app/core/src/main/res/drawable-nodpi/ic_yuyu_icon.png
+          cp /tmp/customize/ic_launcher.xml app/core/src/main/res/drawable-v26/ic_launcher.xml
+          cp /tmp/customize/MagiskTheme.kt app/apk-ng/src/main/java/com/topjohnwu/magisk/ui/MagiskTheme.kt
+
+      - name: Add liquid glass effect
+        run: |
+          cat > /tmp/patch_glass.py << 'PYEOF'
+          # ---- Config.kt: add glass effect setting (default OFF) ----
+          cfg_path = 'app/core/src/main/java/com/topjohnwu/magisk/core/Config.kt'
+          with open(cfg_path, 'r', encoding='utf-8') as f:
+              cfg = f.read()
+          cfg = cfg.replace(
+              'const val SAFETY = "safety_notice"',
+              'const val SAFETY = "safety_notice"\n        const val YUYU_GLASS = "yuyu_glass_effect"'
+          )
+          cfg = cfg.replace(
+              'var safetyNotice by preference(Key.SAFETY, true)',
+              'var safetyNotice by preference(Key.SAFETY, true)\n    var glassEffect by preference(Key.YUYU_GLASS, false)'
+          )
+          with open(cfg_path, 'w', encoding='utf-8') as f:
+              f.write(cfg)
+
+          # ---- MagiskTheme.kt: apply translucent surface colors when glass effect enabled ----
+          th_path = 'app/apk-ng/src/main/java/com/topjohnwu/magisk/ui/MagiskTheme.kt'
+          with open(th_path, 'r', encoding='utf-8') as f:
+              th = f.read()
+
+          th = th.replace(
+              'import androidx.compose.runtime.mutableIntStateOf\n',
+              'import androidx.compose.runtime.mutableIntStateOf\n'
+              'import androidx.compose.runtime.mutableStateOf\n'
+          )
+
+          th = th.replace(
+              'object ThemeState {\n    var colorMode by mutableIntStateOf(Config.colorMode)\n}',
+              'object ThemeState {\n'
+              '    var colorMode by mutableIntStateOf(Config.colorMode)\n'
+              '    var glassEffect by mutableStateOf(Config.glassEffect)\n'
+              '}'
+          )
+
+          th = th.replace(
+              '    MaterialTheme(\n        colorScheme = colorScheme,\n        content = content\n    )',
+              '    val finalColorScheme = if (ThemeState.glassEffect) {\n'
+              '        val a = 0.55f\n'
+              '        colorScheme.copy(\n'
+              '            surface = colorScheme.surface.copy(alpha = a),\n'
+              '            surfaceVariant = colorScheme.surfaceVariant.copy(alpha = a),\n'
+              '            surfaceContainer = colorScheme.surfaceContainer.copy(alpha = a),\n'
+              '            surfaceContainerLow = colorScheme.surfaceContainerLow.copy(alpha = a),\n'
+              '            surfaceContainerLowest = colorScheme.surfaceContainerLowest.copy(alpha = a),\n'
+              '            surfaceContainerHigh = colorScheme.surfaceContainerHigh.copy(alpha = a),\n'
+              '            surfaceContainerHighest = colorScheme.surfaceContainerHighest.copy(alpha = a)\n'
+              '        )\n'
+              '    } else colorScheme\n'
+              '\n'
+              '    MaterialTheme(\n        colorScheme = finalColorScheme,\n        content = content\n    )'
+          )
+
+          with open(th_path, 'w', encoding='utf-8') as f:
+              f.write(th)
+
+          # ---- SettingsScreen.kt: add toggle switch ----
+          ss_path = 'app/apk-ng/src/main/java/com/topjohnwu/magisk/ui/settings/SettingsScreen.kt'
+          with open(ss_path, 'r', encoding='utf-8') as f:
+              ss = f.read()
+
+          old_anchor = (
+              "        var checkUpdate by remember { mutableStateOf(Config.checkUpdate) }\n"
+              "        SettingsSwitch(\n"
+              "            title = stringResource(CoreR.string.settings_check_update_title),\n"
+              "            summary = stringResource(CoreR.string.settings_check_update_summary),\n"
+              "            checked = checkUpdate,\n"
+              "            onCheckedChange = { newValue ->\n"
+              "                checkUpdate = newValue\n"
+              "                Config.checkUpdate = newValue\n"
+              "            }\n"
+              "        )\n"
+          )
+          new_block = old_anchor + (
+              "\n"
+              "        // YuYu Glass Effect Toggle\n"
+              "        var glassEffect by remember { mutableStateOf(Config.glassEffect) }\n"
+              "        SettingsSwitch(\n"
+              "            title = \"\\u6db2\\u6001\\u73bb\\u7483\\u6548\\u679c\",\n"
+              "            summary = \"\\u5f00\\u542f\\u540e\\u5361\\u7247\\u4e0e\\u5e95\\u90e8\\u5bfc\\u822a\\u680f\\u5c06\\u53d8\\u4e3a\\u534a\\u900f\\u660e\\u73bb\\u7483\\u98ce\\u683c\",\n"
+              "            checked = glassEffect,\n"
+              "            onCheckedChange = { newValue ->\n"
+              "                glassEffect = newValue\n"
+              "                Config.glassEffect = newValue\n"
+              "                ThemeState.glassEffect = newValue\n"
+              "            }\n"
+              "        )\n"
+          )
+          assert ss.count(old_anchor) == 1, "anchor not found or not unique"
+          ss = ss.replace(old_anchor, new_block)
+
+          with open(ss_path, 'w', encoding='utf-8') as f:
+              f.write(ss)
+
+          print("glass patch applied")
+          PYEOF
+          python3 /tmp/patch_glass.py
+
+      - name: Setup environment
+        uses: ./.github/actions/setup
+
+      - name: Restore keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE_BASE64" | base64 -d > yuyu-release.jks
+
+      - name: Write signing config
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          cat > config.prop << EOC
+          keyStore=yuyu-release.jks
+          keyStorePass=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPass=$KEY_PASSWORD
+          EOC
+
+      - name: Build release
+        run: ./build.py -vr all
+
+      - name: Stop gradle daemon
+        run: ./app/gradlew --stop
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: yuyu-kernel-ultra-${{ github.sha }}
+          path: out
+          compression-level: 9

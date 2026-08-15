@@ -1,0 +1,301 @@
+name: Build YuYu Kernel Ultra
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out (to grab customization files)
+        uses: actions/checkout@v6
+
+      - name: Stash customization files
+        run: |
+          mkdir -p /tmp/customize
+          cp app/core/src/main/res/drawable-xxxhdpi/ic_yuyu_icon.png /tmp/customize/
+          cp app/core/src/main/res/drawable-v26/ic_launcher.xml /tmp/customize/
+          cp app/apk-ng/src/main/java/com/topjohnwu/magisk/ui/MagiskTheme.kt /tmp/customize/
+
+      - name: Wipe workspace
+        run: |
+          shopt -s dotglob
+          rm -rf ${{ github.workspace }}/*
+
+      - name: Clone clean upstream Magisk (with submodules)
+        run: git clone --recurse-submodules https://github.com/topjohnwu/Magisk.git ${{ github.workspace }}
+
+      - name: Apply YuYu customizations
+        run: |
+          set -e
+          sed -i 's/applicationId = "com\.topjohnwu\.magisk"/applicationId = "org.yuyuultra.magisk.user"/g' app/build-logic/src/main/java/Setup.kt
+          sed -i 's/android:label="Magisk"/android:label="YuYu Kernel Ultra"/' app/shared/src/main/AndroidManifest.xml
+          sed -i 's/#00AF9C/#FF91D5FF/' app/core/src/main/res/values/colors.xml
+          sed -i 's#@drawable/ic_magisk_padded#@drawable/ic_yuyu_icon#g' app/core/src/main/res/values/themes.xml app/core/src/main/res/values-v31/themes.xml
+          python3 -c "
+          import re
+          path = 'app/core/src/main/res/values/strings.xml'
+          with open(path, 'r', encoding='utf-8') as f:
+              content = f.read()
+          def replace_text(m):
+              return m.group(1) + m.group(2).replace('Magisk', 'YuYu Kernel Ultra') + m.group(3)
+          pattern = re.compile(r'(<string[^>]*>)(.*?)(</string>)', re.DOTALL)
+          content = pattern.sub(replace_text, content)
+          with open(path, 'w', encoding='utf-8') as f:
+              f.write(content)
+          "
+          mkdir -p app/core/src/main/res/drawable-xxxhdpi
+          cp /tmp/customize/ic_yuyu_icon.png app/core/src/main/res/drawable-xxxhdpi/ic_yuyu_icon.png
+          cp /tmp/customize/ic_launcher.xml app/core/src/main/res/drawable-v26/ic_launcher.xml
+          cp /tmp/customize/MagiskTheme.kt app/apk-ng/src/main/java/com/topjohnwu/magisk/ui/MagiskTheme.kt
+
+      - name: Add YuYu home screen cards
+        run: |
+          cat > /tmp/patch_home.py << 'PYEOF'
+          import re
+
+          # ---- HomeViewModel.kt ----
+          vm_path = 'app/apk-ng/src/main/java/com/topjohnwu/magisk/ui/home/HomeViewModel.kt'
+          with open(vm_path, 'r', encoding='utf-8') as f:
+              vm = f.read()
+
+          vm = vm.replace(
+              'import androidx.core.net.toUri\n',
+              'import androidx.core.net.toUri\n'
+              'import android.os.Build\n'
+              'import android.os.SystemClock\n'
+              'import com.topjohnwu.magisk.core.di.ServiceLocator\n'
+              'import com.topjohnwu.magisk.core.model.module.LocalModule\n'
+              'import com.topjohnwu.magisk.core.model.su.SuPolicy\n'
+              'import kotlinx.coroutines.Dispatchers\n'
+              'import kotlinx.coroutines.withContext\n'
+          )
+
+          vm = vm.replace(
+              '        val envFixCode: Int = 0,\n    )',
+              '        val envFixCode: Int = 0,\n'
+              '        val uptimeText: String = "",\n'
+              '        val suGrantedCount: Int = 0,\n'
+              '        val moduleCount: Int = 0,\n'
+              '        val deviceModel: String = Build.MODEL ?: "",\n'
+              '        val androidVersion: String = Build.VERSION.RELEASE ?: "",\n'
+              '        val kernelVersion: String = System.getProperty("os.version") ?: "",\n'
+              '        val selinuxStatus: String = "",\n    )'
+          )
+
+          vm = vm.replace(
+              '        ensureEnv()\n    }\n\n    private val networkObserver',
+              '        ensureEnv()\n        loadYuyuExtras()\n    }\n\n    private val networkObserver'
+          )
+
+          vm = vm.replace(
+              '        checkedEnv = true\n    }\n}',
+              '        checkedEnv = true\n    }\n\n'
+              '    private suspend fun loadYuyuExtras() {\n'
+              '        val totalSeconds = SystemClock.elapsedRealtime() / 1000\n'
+              '        val days = totalSeconds / 86400\n'
+              '        val hours = (totalSeconds % 86400) / 3600\n'
+              '        val minutes = (totalSeconds % 3600) / 60\n'
+              '        val uptime = if (days > 0) "${days} \u5929${hours} \u5c0f\u65f6${minutes} \u5206\u949f" else "${hours} \u5c0f\u65f6${minutes} \u5206\u949f"\n'
+              '\n'
+              '        val granted = if (Info.isRooted) withContext(Dispatchers.IO) {\n'
+              '            runCatching { ServiceLocator.policyDB.fetchAll().count { it.policy == SuPolicy.ALLOW } }.getOrDefault(0)\n'
+              '        } else 0\n'
+              '\n'
+              '        val modules = if (Info.isRooted) withContext(Dispatchers.IO) {\n'
+              '            runCatching { LocalModule.installed().size }.getOrDefault(0)\n'
+              '        } else 0\n'
+              '\n'
+              '        val selinux = if (Info.isRooted) withContext(Dispatchers.IO) {\n'
+              '            runCatching { Shell.cmd("getenforce").exec().out.firstOrNull() ?: "\u672a\u77e5" }.getOrDefault("\u672a\u77e5")\n'
+              '        } else "\u672a\u77e5"\n'
+              '\n'
+              '        _uiState.update {\n'
+              '            it.copy(\n'
+              '                uptimeText = uptime,\n'
+              '                suGrantedCount = granted,\n'
+              '                moduleCount = modules,\n'
+              '                selinuxStatus = selinux\n'
+              '            )\n'
+              '        }\n'
+              '    }\n}'
+          )
+
+          with open(vm_path, 'w', encoding='utf-8') as f:
+              f.write(vm)
+
+          # ---- HomeScreen.kt ----
+          hs_path = 'app/apk-ng/src/main/java/com/topjohnwu/magisk/ui/home/HomeScreen.kt'
+          with open(hs_path, 'r', encoding='utf-8') as f:
+              hs = f.read()
+
+          hs = hs.replace(
+              'import androidx.compose.foundation.background\\n',
+              'import androidx.compose.foundation.background\\n'
+              'import androidx.compose.foundation.border\\n'
+              'import androidx.compose.ui.graphics.Color\\n'
+              'import androidx.compose.material3.CardDefaults\\n'
+          )
+
+          hs = hs.replace(
+              '            StatusCard()\n\n            AppCard(',
+              '            StatusCard()\n'
+              '            YuyuUptimeCard(uiState.uptimeText)\n'
+              '            YuyuSuModuleCard(uiState.suGrantedCount, uiState.moduleCount)\n'
+              '            YuyuSystemInfoCard(uiState.deviceModel, uiState.androidVersion, uiState.kernelVersion, uiState.selinuxStatus)\n\n'
+              '            AppCard('
+          )
+
+          new_cards = (
+              '\n@Composable\n'
+              'private fun YuyuUptimeCard(uptimeText: String) {\n'
+              '    val statuses = listOf(\n'
+              '        StatusInfo(label = "Root \u72b6\u6001", status = if (Info.isRooted) "\u5df2\u83b7\u53d6" else "\u672a\u83b7\u53d6"),\n'
+              '        StatusInfo(label = "\u5df2\u5f00\u673a\u65f6\u95f4", status = uptimeText.ifEmpty { "\u83b7\u53d6\u4e2d" })\n'
+              '    )\n'
+              '    Card(\n'
+              '        modifier = Modifier.fillMaxWidth()\n'
+              '            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(24.dp)),\n'
+              '        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.15f)),\n'
+              '        shape = RoundedCornerShape(24.dp)\n'
+              '    ) {\n'
+              '        Row(\n'
+              '            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),\n'
+              '            verticalAlignment = Alignment.CenterVertically\n'
+              '        ) {\n'
+              '            statuses.forEachIndexed { index, info ->\n'
+              '                Column(\n'
+              '                    modifier = Modifier.weight(1f).padding(16.dp),\n'
+              '                    horizontalAlignment = Alignment.CenterHorizontally,\n'
+              '                    verticalArrangement = Arrangement.Center\n'
+              '                ) {\n'
+              '                    Text(text = info.label, style = MaterialTheme.typography.bodyLarge)\n'
+              '                    Text(text = info.status, style = MaterialTheme.typography.bodyMedium)\n'
+              '                }\n'
+              '                if (index < statuses.lastIndex) {\n'
+              '                    VerticalDivider(thickness = 0.5.dp, modifier = Modifier.padding(vertical = 12.dp))\n'
+              '                }\n'
+              '            }\n'
+              '        }\n'
+              '    }\n'
+              '}\n'
+              '\n@Composable\n'
+              'private fun YuyuSuModuleCard(suCount: Int, moduleCount: Int) {\n'
+              '    val statuses = listOf(\n'
+              '        StatusInfo(label = "\u5df2\u6388\u6743 Root \u5e94\u7528", status = "$suCount \u4e2a"),\n'
+              '        StatusInfo(label = "\u5df2\u5b89\u88c5\u6a21\u5757", status = "$moduleCount \u4e2a")\n'
+              '    )\n'
+              '    Card(\n'
+              '        modifier = Modifier.fillMaxWidth()\n'
+              '            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(24.dp)),\n'
+              '        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.15f)),\n'
+              '        shape = RoundedCornerShape(24.dp)\n'
+              '    ) {\n'
+              '        Row(\n'
+              '            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),\n'
+              '            verticalAlignment = Alignment.CenterVertically\n'
+              '        ) {\n'
+              '            statuses.forEachIndexed { index, info ->\n'
+              '                Column(\n'
+              '                    modifier = Modifier.weight(1f).padding(16.dp),\n'
+              '                    horizontalAlignment = Alignment.CenterHorizontally,\n'
+              '                    verticalArrangement = Arrangement.Center\n'
+              '                ) {\n'
+              '                    Text(text = info.label, style = MaterialTheme.typography.bodyLarge)\n'
+              '                    Text(text = info.status, style = MaterialTheme.typography.bodyMedium)\n'
+              '                }\n'
+              '                if (index < statuses.lastIndex) {\n'
+              '                    VerticalDivider(thickness = 0.5.dp, modifier = Modifier.padding(vertical = 12.dp))\n'
+              '                }\n'
+              '            }\n'
+              '        }\n'
+              '    }\n'
+              '}\n'
+              '\n@Composable\n'
+              'private fun YuyuSystemInfoCard(\n'
+              '    deviceModel: String,\n'
+              '    androidVersion: String,\n'
+              '    kernelVersion: String,\n'
+              '    selinuxStatus: String\n'
+              ') {\n'
+              '    val infos = listOf(\n'
+              '        "\u8bbe\u5907\u540d\u79f0" to deviceModel,\n'
+              '        "\u7cfb\u7edf\u7248\u672c" to "Android $androidVersion",\n'
+              '        "\u5185\u6838\u7248\u672c" to kernelVersion,\n'
+              '        "SELinux" to selinuxStatus\n'
+              '    )\n'
+              '    Card(\n'
+              '        modifier = Modifier.fillMaxWidth()\n'
+              '            .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(24.dp)),\n'
+              '        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.15f)),\n'
+              '        shape = RoundedCornerShape(24.dp)\n'
+              '    ) {\n'
+              '        Column(modifier = Modifier.padding(16.dp)) {\n'
+              '            infos.forEachIndexed { index, pair ->\n'
+              '                Row(\n'
+              '                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),\n'
+              '                    horizontalArrangement = Arrangement.SpaceBetween\n'
+              '                ) {\n'
+              '                    Text(text = pair.first, style = MaterialTheme.typography.bodyLarge)\n'
+              '                    Text(text = pair.second, style = MaterialTheme.typography.bodyMedium)\n'
+              '                }\n'
+              '                if (index < infos.lastIndex) {\n'
+              '                    HorizontalDivider(thickness = 0.5.dp)\n'
+              '                }\n'
+              '            }\n'
+              '        }\n'
+              '    }\n'
+              '}\n'
+              '\n@Composable\n'
+              'private fun SupportCard(onLinkClicked: (String) -> Unit) {'
+          )
+
+          hs = hs.replace(
+              '\n@Composable\nprivate fun SupportCard(onLinkClicked: (String) -> Unit) {',
+              new_cards
+          )
+
+          with open(hs_path, 'w', encoding='utf-8') as f:
+              f.write(hs)
+
+          print("patched ok")
+
+          PYEOF
+          python3 /tmp/patch_home.py
+
+      - name: Setup environment
+        uses: ./.github/actions/setup
+
+      - name: Restore keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE_BASE64" | base64 -d > yuyu-release.jks
+
+      - name: Write signing config
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          cat > config.prop << EOC
+          keyStore=yuyu-release.jks
+          keyStorePass=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPass=$KEY_PASSWORD
+          EOC
+
+      - name: Build release
+        run: ./build.py -vr all
+
+      - name: Stop gradle daemon
+        run: ./app/gradlew --stop
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: yuyu-kernel-ultra-${{ github.sha }}
+          path: out
+          compression-level: 9
