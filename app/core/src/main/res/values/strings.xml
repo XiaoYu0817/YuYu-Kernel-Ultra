@@ -24,7 +24,7 @@
     <string name="home_support_title">Support Us</string>
     <string name="home_follow_title">Follow Us</string>
     <string name="home_item_source">Source</string>
-    <string name="home_support_content">Magisk 始终保持免费和开源。\n\n衷心感谢所有支持开源项目的用户。捐赠可以帮助开发者持续维护并改进此项目。\n\n注意：\n\n此版本并非 Magisk 官方版本。\n\n此版本由「XiaoYu0817」（小瑜）基于 Magisk 开源代码编译，并加入额外定制修改与功能调整。\n\n本人不会在此软件中加入任何恶意代码、后门或隐藏行为。\n\n请认准官方发布渠道或可信来源获取软件。\n\n若通过未经授权的第三方渠道获取修改版、篡改版软件，而导致设备异常、数据丢失或其他问题，相关后果与本人无关。\n\n请注意软件来源并谨慎辨别。</string>
+    <string name="home_support_content">Magisk 始终保持免费与开源\n\n感谢所有支持开源项目发展的用户。您的支持将帮助开发者持续维护项目、修复问题并推动功能改进。\n\n关于本版本\n\n请注意：\n此版本并非 Magisk 官方发布版本。\n\n本版本由 XiaoYu0817（小瑜） 基于 Magisk 开源代码进行编译，并在此基础上进行了额外定制与功能调整。\n\n本人承诺：\n\n- 不会在软件中加入恶意代码；\n- 不会植入后门程序；\n- 不会添加未经公开说明的隐藏行为。\n\n使用注意\n\n请始终通过官方发布渠道或可信来源获取软件。\n\n若用户通过未经授权的第三方渠道下载、传播或修改本版本，并因此造成设备异常、数据丢失、安全风险或其他问题，相关责任由下载及传播渠道自行承担。\n\n请在使用前确认软件来源，并谨慎辨别修改版与官方版本的区别。\n\n关于捐赠\n\n本页面显示的捐赠渠道属于 Magisk 官方开发者支持渠道。\n\n相关捐赠资金不会进入本人账户，也不会用于个人用途。\n\n感谢每一位支持开源项目的用户。</string>
     <string name="home_installed_version">Installed</string>
     <string name="home_latest_version">Latest</string>
     <string name="invalid_update_channel">Invalid update channel</string>
