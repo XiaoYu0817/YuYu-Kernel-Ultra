@@ -78,6 +78,8 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                 Spacer(Modifier.height(12.dp))
                 SuperuserSection(viewModel)
             }
+            Spacer(Modifier.height(12.dp))
+            AgreementSection()
         }
     }
 }
@@ -476,6 +478,47 @@ private fun SuperuserSection(viewModel: SettingsViewModel) {
                 }
             )
         }
+    }
+}
+
+// --- User Agreement ---
+
+@Composable
+private fun AgreementSection() {
+    var showAgreement by remember { mutableStateOf(false) }
+
+    SmallTitle(text = stringResource(CoreR.string.home_support_title))
+    Card(modifier = Modifier.fillMaxWidth()) {
+        SettingsArrow(
+            title = stringResource(CoreR.string.yuyu_agreement_title),
+            summary = stringResource(CoreR.string.yuyu_agreement_view_hint),
+            onClick = { showAgreement = true }
+        )
+    }
+
+    if (showAgreement) {
+        val scrollState = rememberScrollState()
+        AlertDialog(
+            onDismissRequest = { showAgreement = false },
+            title = { Text(stringResource(CoreR.string.yuyu_agreement_title)) },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(scrollState)
+                ) {
+                    Text(
+                        text = stringResource(CoreR.string.yuyu_agreement_content),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showAgreement = false }) {
+                    Text(stringResource(android.R.string.ok))
+                }
+            }
+        )
     }
 }
 
