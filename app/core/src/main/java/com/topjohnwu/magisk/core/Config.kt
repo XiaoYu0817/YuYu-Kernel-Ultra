@@ -46,9 +46,11 @@ object Config : PreferenceConfig, DBConfig {
         const val ASKED_HOME = "asked_home"
         const val DOH = "doh"
         const val RAND_NAME = "rand_name"
+        const val YUYU_GLASS = "yuyu_glass_effect"
+        const val YUYU_AGREEMENT = "yuyu_user_agreement"
 
         val NO_MIGRATION = setOf(ASKED_HOME, SU_REQUEST_TIMEOUT,
-            SU_AUTO_RESPONSE, SU_REAUTH, SU_TAPJACK)
+            SU_AUTO_RESPONSE, SU_REAUTH, SU_TAPJACK, YUYU_AGREEMENT, YUYU_GLASS)
     }
 
     object OldValue {
@@ -112,6 +114,7 @@ object Config : PreferenceConfig, DBConfig {
     var themeOrdinal by preference(Key.THEME_ORDINAL, 0)
     var colorMode by preference(Key.COLOR_MODE, 0)
     var glassEffect by preference(Key.YUYU_GLASS, false)
+    var yuyuAgreementAccepted by preference(Key.YUYU_AGREEMENT, false)
 
     private var checkUpdatePrefs by preference(Key.CHECK_UPDATES, true)
     private var localePrefs by preference(Key.LOCALE, "")

@@ -117,6 +117,8 @@ fun HomeScreen(viewModel: HomeViewModel, installVm: InstallViewModel) {
     var batteryInfo by remember { mutableStateOf("正在读取...") }
     var cpuFreqInfo by remember { mutableStateOf("正在读取...") }
 
+    var showAgreementDialog by remember { mutableStateOf(!Config.yuyuAgreementAccepted) }
+
     LaunchedEffect(showDeviceDetailDialog) {
         if (showDeviceDetailDialog) {
             while (isActive) {
@@ -239,6 +241,40 @@ fun HomeScreen(viewModel: HomeViewModel, installVm: InstallViewModel) {
             activity = activity,
             loadingDialog = loadingDialog,
             onNavigateInstall = { showInstallSheet.value = true },
+        )
+    }
+
+    if (showAgreementDialog) {
+        AlertDialog(
+            onDismissRequest = { },
+            title = { Text(stringResource(CoreR.string.yuyu_agreement_title)) },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text(
+                        text = stringResource(CoreR.string.yuyu_agreement_content),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    Config.yuyuAgreementAccepted = true
+                    showAgreementDialog = false
+                }) {
+                    Text(stringResource(CoreR.string.yuyu_agree_yes))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    activity.finishAffinity()
+                }) {
+                    Text(stringResource(CoreR.string.yuyu_agree_no))
+                }
+            }
         )
     }
 
