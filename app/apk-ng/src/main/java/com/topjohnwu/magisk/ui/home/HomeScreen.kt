@@ -260,6 +260,12 @@ fun HomeScreen(viewModel: HomeViewModel, installVm: InstallViewModel) {
                         .verticalScroll(agreementScrollState)
                 ) {
                     Text(
+                        text = "请阅读并滑动到最底部后，才可点击「同意并继续」",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                    Text(
                         text = stringResource(CoreR.string.yuyu_agreement_content),
                         style = MaterialTheme.typography.bodyMedium
                     )
