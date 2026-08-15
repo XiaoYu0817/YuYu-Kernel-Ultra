@@ -48,6 +48,31 @@ jobs:
             echo "Skipping signing config (some secrets missing)"
           fi
 
+      - name: Fix executable permissions
+        run: chmod +x build.py app/gradlew
+
+      - name: Restore missing git submodules
+        run: |
+          set -e
+          ext="native/src/external"
+          fetch_sub() {
+            local name="$1" url="$2" sha="$3"
+            local dir="$ext/$name"
+            rm -rf "$dir"
+            mkdir -p "$dir"
+            curl -fsSL "${url}/archive/${sha}.tar.gz" -o /tmp/sub.tar.gz
+            tar -xzf /tmp/sub.tar.gz -C "$dir" --strip-components=1
+            rm -f /tmp/sub.tar.gz
+            echo "restored $name @ ${sha:0:7}"
+          }
+          fetch_sub crt0              https://github.com/topjohnwu/crt0              49bbd472a250e75315a9183586fab1e0c0982618
+          fetch_sub cxx-rs            https://github.com/topjohnwu/cxx                b09b91554b392523f633b9e3cbe0b43273528c71
+          fetch_sub libcxx            https://github.com/topjohnwu/libcxx             130833618a50ff724a637d54fcb888d170ff9818
+          fetch_sub lsplt             https://github.com/LSPosed/LSPlt               7d609ac3c2d8faa0c830b0904024ef5c81a98e6e
+          fetch_sub lz4               https://github.com/lz4/lz4                    d44371841a2f1728a3f36839fd4b7e872d0927d3
+          fetch_sub selinux           https://github.com/topjohnwu/selinux           be1b39a657fee7faacfae548b75cb53302043a01
+          fetch_sub system_properties https://github.com/topjohnwu/system_properties 2bf706b2a72caaf105d45e5929bb246068be4edc
+
       - name: Build release
         run: ./build.py -vr all
 
