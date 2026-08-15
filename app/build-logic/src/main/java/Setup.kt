@@ -274,10 +274,10 @@ fun Project.setupMainApk() {
     setupAppCommon()
 
     androidApp {
-        namespace = "org.yuyuultra.magisk.user"
+        namespace = "com.topjohnwu.magisk"
 
         defaultConfig {
-            applicationId = "org.yuyuultra.magisk.user"
+            applicationId = "com.topjohnwu.magisk"
             vectorDrawables.useSupportLibrary = true
             versionName = Config.version
             versionCode = Config.versionCode
