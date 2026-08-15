@@ -1,4 +1,4 @@
-p ackage com.topjohnwu.magisk.ui.home
+package com.topjohnwu.magisk.ui.home
 
 import android.app.ActivityManager
 import android.content.Context
