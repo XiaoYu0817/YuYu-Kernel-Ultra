@@ -73,6 +73,10 @@ jobs:
           fetch_sub selinux           https://github.com/topjohnwu/selinux           be1b39a657fee7faacfae548b75cb53302043a01
           fetch_sub system_properties https://github.com/topjohnwu/system_properties 2bf706b2a72caaf105d45e5929bb246068be4edc
 
+          mkdir -p native/out/generated/rust
+          cp native/src/external/cxx-rs/include/cxx.h native/out/generated/rust/cxx.h
+          echo "staged rust/cxx.h into include path"
+
       - name: Build release
         run: ./build.py -vr all
 
