@@ -55,6 +55,24 @@
     <string name="home_kernel_version">Kernel Version</string>
     <string name="home_selinux">SELinux</string>
 
+    <!--Feature tab-->
+    <string name="section_features">Features</string>
+    <string name="features_title">Features</string>
+    <string name="features_backup_boot">Backup Boot Image</string>
+    <string name="features_backup_boot_desc">Back up the current boot image so you can restore it at any time. Useful before flashing a new Magisk patch.</string>
+    <string name="features_backup_boot_button">Backup</string>
+    <string name="features_backup_started">Backing up boot image…</string>
+    <string name="features_backup_done">Boot image backed up to Downloads</string>
+    <string name="features_backup_fail">Backup failed: %1$s</string>
+    <string name="features_more_title">More Features Coming Soon</string>
+    <string name="features_more_desc">More practical features are being developed and will be added here in future updates.</string>
+
+    <!--Custom background-->
+    <string name="settings_background_title">Custom Background</string>
+    <string name="settings_background_summary_set">Background image is set</string>
+    <string name="settings_background_summary_none">Set a custom background image</string>
+    <string name="settings_background_clear">Remove Background</string>
+
     <!--Install-->
     <string name="keep_force_encryption">Preserve force encryption</string>
     <string name="keep_dm_verity">Preserve AVB 2.0/dm-verity</string>
