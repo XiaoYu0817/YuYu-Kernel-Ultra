@@ -739,19 +739,22 @@ private fun OverviewCard(
     grantedApps: Int,
     moduleCount: Int,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        Card(
             modifier = Modifier
-                .fillMaxWidth()
+                .weight(1f)
                 .height(IntrinsicSize.Min),
-            verticalAlignment = Alignment.CenterVertically
+            shape = RoundedCornerShape(24.dp)
         ) {
             Column(
                 modifier = Modifier
-                    .weight(1f)
+                    .fillMaxWidth()
                     .padding(16.dp)
             ) {
                 OverviewItem(
@@ -767,13 +770,16 @@ private fun OverviewCard(
                     value = formatUptime(uptimeMillis)
                 )
             }
-            VerticalDivider(
-                thickness = 0.5.dp,
-                modifier = Modifier.padding(vertical = 12.dp)
-            )
+        }
+        Card(
+            modifier = Modifier
+                .weight(1f)
+                .height(IntrinsicSize.Min),
+            shape = RoundedCornerShape(24.dp)
+        ) {
             Column(
                 modifier = Modifier
-                    .weight(1f)
+                    .fillMaxWidth()
                     .padding(16.dp)
             ) {
                 OverviewItem(
