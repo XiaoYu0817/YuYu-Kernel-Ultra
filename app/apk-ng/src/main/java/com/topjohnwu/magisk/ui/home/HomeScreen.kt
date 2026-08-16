@@ -359,17 +359,14 @@ fun HomeScreen(viewModel: HomeViewModel, installVm: InstallViewModel) {
                 version = viewModel.magiskInstalledVersion,
             ) { showInstallSheet.value = true }
 
-            StatusCard()
-
-            RootUptimeCard(
+            OverviewCard(
                 isRooted = viewModel.isRooted,
                 uptimeMillis = uiState.uptimeMillis,
-            )
-
-            SuModuleStatsCard(
                 grantedApps = uiState.suGrantedCount,
                 moduleCount = uiState.moduleCount,
             )
+
+            StatusCard()
 
             SystemInfoCard(
                 deviceName = viewModel.deviceName,
@@ -736,33 +733,77 @@ private fun StatusCard() {
 }
 
 @Composable
-private fun RootUptimeCard(isRooted: Boolean, uptimeMillis: Long) {
-    val statuses = listOf(
-        StatusInfo(
-            label = stringResource(CoreR.string.home_root_status),
-            status = stringResource(if (isRooted) CoreR.string.home_rooted else CoreR.string.home_not_rooted)
-        ),
-        StatusInfo(
-            label = stringResource(CoreR.string.home_uptime),
-            status = formatUptime(uptimeMillis)
-        )
-    )
-    StatusRowCard(statuses)
+private fun OverviewCard(
+    isRooted: Boolean,
+    uptimeMillis: Long,
+    grantedApps: Int,
+    moduleCount: Int,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(16.dp)
+            ) {
+                OverviewItem(
+                    label = stringResource(CoreR.string.home_root_status),
+                    value = stringResource(if (isRooted) CoreR.string.home_rooted else CoreR.string.home_not_rooted)
+                )
+                OverviewItem(
+                    label = stringResource(CoreR.string.home_execution_mode),
+                    value = stringResource(CoreR.string.home_execution_mode_value)
+                )
+                OverviewItem(
+                    label = stringResource(CoreR.string.home_uptime),
+                    value = formatUptime(uptimeMillis)
+                )
+            }
+            VerticalDivider(
+                thickness = 0.5.dp,
+                modifier = Modifier.padding(vertical = 12.dp)
+            )
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(16.dp)
+            ) {
+                OverviewItem(
+                    label = stringResource(CoreR.string.home_su_granted_apps),
+                    value = grantedApps.toString()
+                )
+                OverviewItem(
+                    label = stringResource(CoreR.string.home_module_count),
+                    value = moduleCount.toString()
+                )
+            }
+        }
+    }
 }
 
 @Composable
-private fun SuModuleStatsCard(grantedApps: Int, moduleCount: Int) {
-    val statuses = listOf(
-        StatusInfo(
-            label = stringResource(CoreR.string.home_su_granted_apps),
-            status = grantedApps.toString()
-        ),
-        StatusInfo(
-            label = stringResource(CoreR.string.home_module_count),
-            status = moduleCount.toString()
+private fun OverviewItem(label: String, value: String) {
+    Column(
+        modifier = Modifier.padding(vertical = 8.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-    )
-    StatusRowCard(statuses)
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium
+        )
+    }
 }
 
 @Composable

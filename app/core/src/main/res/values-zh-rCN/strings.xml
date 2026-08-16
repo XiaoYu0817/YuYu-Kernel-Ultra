@@ -46,6 +46,8 @@
     <string name="home_uptime_format">%1$d 天 %2$d 时 %3$d 分</string>
     <string name="home_su_granted_apps">已授权应用</string>
     <string name="home_module_count">已安装模块</string>
+    <string name="home_execution_mode">执行方式</string>
+    <string name="home_execution_mode_value">alpha</string>
     <string name="home_sysinfo_title">系统信息</string>
     <string name="home_device_name">设备名称</string>
     <string name="home_android_version">系统版本</string>
