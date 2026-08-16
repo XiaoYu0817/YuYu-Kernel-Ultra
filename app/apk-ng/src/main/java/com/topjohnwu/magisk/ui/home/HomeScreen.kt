@@ -567,14 +567,14 @@ private fun CoreCard(
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
-                    painter = painterResource(CoreR.drawable.ic_magisk_outline),
+                    painter = painterResource(CoreR.drawable.ic_cat_yuyu),
                     contentDescription = null,
                     modifier = Modifier.size(48.dp)
                 )
                 Spacer(Modifier.width(16.dp))
                 Column {
                     Text(
-                        text = stringResource(CoreR.string.magisk),
+                        text = "YuYu Kernel Ultra (Alpha)",
                         style = MaterialTheme.typography.titleLarge
                     )
                     Text(
