@@ -14,7 +14,5 @@
     <string name="github" translatable="false">GitHub</string>
     <string name="sponsor" translatable="false">Sponsor</string>
 
-    <drawable name="ic_launcher">@drawable/ic_logo</drawable>
-
     <bool name="enable_fg_service">true</bool>
 </resources>
