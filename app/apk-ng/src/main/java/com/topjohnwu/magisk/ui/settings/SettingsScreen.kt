@@ -1,6 +1,9 @@
 package com.topjohnwu.magisk.ui.settings
 
+import android.content.Intent
 import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -136,6 +139,39 @@ private fun CustomizationSection(viewModel: SettingsViewModel) {
                 ThemeState.colorMode = index
             }
         )
+
+        // Custom Background
+        var backgroundUri by remember { mutableStateOf(Config.backgroundImage) }
+        val backgroundPicker = rememberLauncherForActivityResult(
+            ActivityResultContracts.OpenDocument()
+        ) { uri ->
+            if (uri != null) {
+                runCatching {
+                    context.contentResolver.takePersistableUriPermission(
+                        uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                }
+                Config.backgroundImage = uri.toString()
+                backgroundUri = uri.toString()
+            }
+        }
+        SettingsArrow(
+            title = stringResource(CoreR.string.settings_background_title),
+            summary = stringResource(
+                if (backgroundUri.isNotBlank()) CoreR.string.settings_background_summary_set
+                else CoreR.string.settings_background_summary_none
+            ),
+            onClick = { backgroundPicker.launch(arrayOf("image/*")) }
+        )
+        if (backgroundUri.isNotBlank()) {
+            SettingsArrow(
+                title = stringResource(CoreR.string.settings_background_clear),
+                onClick = {
+                    Config.backgroundImage = ""
+                    backgroundUri = ""
+                }
+            )
+        }
 
         if (isRunningAsStub && ShortcutManagerCompat.isRequestPinShortcutSupported(context)) {
             SettingsArrow(

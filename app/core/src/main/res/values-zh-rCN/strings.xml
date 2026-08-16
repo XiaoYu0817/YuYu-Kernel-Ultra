@@ -9,6 +9,24 @@
     <string name="section_home">主页</string>
     <string name="section_theme">主题</string>
     <string name="denylist">排除列表</string>
+    <string name="section_features">功能</string>
+
+    <!--Features-->
+    <string name="features_title">功能</string>
+    <string name="features_backup_boot">备份 Boot 镜像</string>
+    <string name="features_backup_boot_desc">备份当前 Boot 镜像，随时可以还原。在刷入新的 Magisk 修补包之前建议先备份。</string>
+    <string name="features_backup_boot_button">立即备份</string>
+    <string name="features_backup_started">正在备份 Boot 镜像…</string>
+    <string name="features_backup_done">Boot 镜像已备份到下载目录</string>
+    <string name="features_backup_fail">备份失败：%1$s</string>
+    <string name="features_more_title">更多实用功能等待添加</string>
+    <string name="features_more_desc">更多实用功能正在开发中，将在后续版本中陆续加入。</string>
+
+    <!--Settings: Custom Background-->
+    <string name="settings_background_title">自定义背景图片</string>
+    <string name="settings_background_summary_set">已设置背景图片</string>
+    <string name="settings_background_summary_none">设置一张自定义背景图片</string>
+    <string name="settings_background_clear">移除背景图片</string>
 
     <!--Home-->
     <string name="no_connection">无法连接</string>
