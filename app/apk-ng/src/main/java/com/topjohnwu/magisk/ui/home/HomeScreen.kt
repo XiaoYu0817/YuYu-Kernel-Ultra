@@ -356,11 +356,10 @@ fun HomeScreen(viewModel: HomeViewModel, installVm: InstallViewModel) {
             CoreCard(
                 modifier = Modifier.fillMaxWidth(),
                 state = viewModel.magiskState,
-                version = viewModel.magiskInstalledVersion,
+                isRooted = viewModel.isRooted,
             ) { showInstallSheet.value = true }
 
             OverviewCard(
-                isRooted = viewModel.isRooted,
                 uptimeMillis = uiState.uptimeMillis,
                 grantedApps = uiState.suGrantedCount,
                 moduleCount = uiState.moduleCount,
@@ -538,7 +537,7 @@ private fun InstallButton(
 private fun CoreCard(
     modifier: Modifier = Modifier,
     state: HomeViewModel.State,
-    version: String,
+    isRooted: Boolean,
     onInstallClicked: () -> Unit,
 ) {
     val actionLabel = when (state) {
@@ -575,7 +574,11 @@ private fun CoreCard(
                         style = MaterialTheme.typography.titleLarge
                     )
                     Text(
-                        text = version.ifEmpty { stringResource(CoreR.string.not_available) },
+                        text = stringResource(CoreR.string.home_root_status) + ": " +
+                            stringResource(
+                                if (isRooted) CoreR.string.home_rooted
+                                else CoreR.string.home_not_rooted
+                            ),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
@@ -734,7 +737,6 @@ private fun StatusCard() {
 
 @Composable
 private fun OverviewCard(
-    isRooted: Boolean,
     uptimeMillis: Long,
     grantedApps: Int,
     moduleCount: Int,
@@ -757,10 +759,6 @@ private fun OverviewCard(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                OverviewItem(
-                    label = stringResource(CoreR.string.home_root_status),
-                    value = stringResource(if (isRooted) CoreR.string.home_rooted else CoreR.string.home_not_rooted)
-                )
                 OverviewItem(
                     label = stringResource(CoreR.string.home_execution_mode),
                     value = stringResource(CoreR.string.home_execution_mode_value)
