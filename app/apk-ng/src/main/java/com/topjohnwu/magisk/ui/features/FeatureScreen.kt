@@ -70,6 +70,11 @@ fun FeatureScreen(viewModel: FeatureViewModel) {
                 onBackup = { launchBackup() }
             )
 
+            VolumeRescueCard(
+                installing = uiState.installingRescue,
+                onInstall = viewModel::installVolumeRescue,
+            )
+
             MoreFeaturesCard()
         }
     }
@@ -120,6 +125,55 @@ private fun BackupBootCard(
                 }
                 Spacer(Modifier.width(8.dp))
                 Text(stringResource(CoreR.string.features_backup_boot_button))
+            }
+        }
+    }
+}
+
+@Composable
+private fun VolumeRescueCard(
+    installing: Boolean,
+    onInstall: () -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = stringResource(CoreR.string.features_rescue_title),
+                style = MaterialTheme.typography.titleLarge
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(CoreR.string.features_rescue_desc),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(16.dp))
+            Button(
+                onClick = onInstall,
+                enabled = !installing,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                if (installing) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_hm),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(CoreR.string.features_rescue_button))
             }
         }
     }
