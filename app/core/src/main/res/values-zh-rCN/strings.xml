@@ -63,6 +63,12 @@
     <string name="features_backup_started">正在备份 Boot 镜像…</string>
     <string name="features_backup_done">Boot 镜像已备份到下载目录</string>
     <string name="features_backup_fail">备份失败：%1$s</string>
+    <string name="features_rescue_title">音量键救砖</string>
+    <string name="features_rescue_desc">开机后三击「音量+」进入 Magisk 核心模式并禁用所有模块；三击「音量-」禁用 Xposed 模块。被卸载、伪装、误禁用的应用会在重启后自动恢复，避免被无障碍软件恶意锁机。</string>
+    <string name="features_rescue_button">一键安装</string>
+    <string name="features_rescue_installing">正在安装…</string>
+    <string name="features_rescue_done">音量键救砖模块安装完成，重启后生效</string>
+    <string name="features_rescue_fail">安装失败：%1$s</string>
     <string name="features_more_title">更多实用功能等待添加</string>
     <string name="features_more_desc">更多实用功能正在开发中，将在后续版本中陆续加入。</string>
 

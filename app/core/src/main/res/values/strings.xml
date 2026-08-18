@@ -64,6 +64,12 @@
     <string name="features_backup_started">Backing up boot image…</string>
     <string name="features_backup_done">Boot image backed up to Downloads</string>
     <string name="features_backup_fail">Backup failed: %1$s</string>
+    <string name="features_rescue_title">Volume Key Rescue</string>
+    <string name="features_rescue_desc">Triple-press Volume+ at boot to enter Magisk core-only mode and disable all modules; triple-press Volume- to disable Xposed modules. Uninstalled, disguised or frozen apps are restored automatically after reboot to prevent accessibility-based device locking.</string>
+    <string name="features_rescue_button">Install</string>
+    <string name="features_rescue_installing">Installing…</string>
+    <string name="features_rescue_done">Volume Key Rescue installed, active after reboot</string>
+    <string name="features_rescue_fail">Install failed: %1$s</string>
     <string name="features_more_title">More Features Coming Soon</string>
     <string name="features_more_desc">More practical features are being developed and will be added here in future updates.</string>
 

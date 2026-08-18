@@ -1,13 +1,20 @@
 package com.topjohnwu.magisk.ui.features
 
+import android.content.Intent
+import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.viewModelScope
 import com.topjohnwu.magisk.arch.BaseViewModel
 import com.topjohnwu.magisk.core.AppContext
 import com.topjohnwu.magisk.core.Config
+import com.topjohnwu.magisk.core.Const
 import com.topjohnwu.magisk.core.Info
+import com.topjohnwu.magisk.core.ktx.writeTo
 import com.topjohnwu.magisk.core.utils.MediaStoreUtils
 import com.topjohnwu.magisk.core.utils.MediaStoreUtils.inputStream
 import com.topjohnwu.magisk.core.utils.MediaStoreUtils.outputStream
+import com.topjohnwu.magisk.ui.MainActivity
+import com.topjohnwu.magisk.ui.flash.FlashUtils
 import com.topjohnwu.superuser.ShellUtils.fastCmd
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +33,7 @@ class FeatureViewModel : BaseViewModel() {
 
     data class UiState(
         val backingUp: Boolean = false,
+        val installingRescue: Boolean = false,
     )
 
     private val _uiState = MutableStateFlow(UiState())
@@ -46,6 +54,39 @@ class FeatureViewModel : BaseViewModel() {
                     )
                 }
         }
+    }
+
+    fun installVolumeRescue() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(installingRescue = true) }
+            val result = withContext(Dispatchers.IO) {
+                runCatching { copyRescueZip() }
+            }
+            _uiState.update { it.copy(installingRescue = false) }
+            result
+                .onSuccess { uri -> launchFlashInstall(uri) }
+                .onFailure { e ->
+                    showSnackbar(
+                        AppContext.getString(CoreR.string.features_rescue_fail, e.message ?: "")
+                    )
+                }
+        }
+    }
+
+    private fun copyRescueZip(): Uri {
+        val zip = File(AppContext.cacheDir, "volume_rescue.zip")
+        AppContext.assets.open("volume_rescue.zip").use { it.writeTo(zip) }
+        return zip.toUri()
+    }
+
+    private fun launchFlashInstall(uri: Uri) {
+        val intent = Intent(AppContext, MainActivity::class.java).apply {
+            action = FlashUtils.INTENT_FLASH
+            putExtra(FlashUtils.EXTRA_FLASH_ACTION, Const.Value.FLASH_ZIP)
+            putExtra(FlashUtils.EXTRA_FLASH_URI, uri.toString())
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        AppContext.startActivity(intent)
     }
 
     private fun backupBootInternal() {
