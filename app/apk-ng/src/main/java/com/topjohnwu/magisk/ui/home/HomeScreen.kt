@@ -328,7 +328,7 @@ fun HomeScreen(viewModel: HomeViewModel, installVm: InstallViewModel) {
                 actions = {
                     IconButton(onClick = { showDeviceDetailDialog = true }) {
                         Icon(
-                            painter = painterResource(CoreR.drawable.ic_extension),
+                            painter = painterResource(CoreR.drawable.ic_hm),
                             contentDescription = "设备信息",
                             modifier = Modifier.size(24.dp)
                         )
