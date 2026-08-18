@@ -68,7 +68,7 @@ enum class Tab(val titleRes: Int, val iconRes: Int) {
     MODULES(CoreR.string.modules, R.drawable.ic_module),
     SUPERUSER(CoreR.string.superuser, CoreR.drawable.ic_superuser),
     HOME(CoreR.string.section_home, R.drawable.ic_home),
-    FEATURES(CoreR.string.section_features, CoreR.drawable.ic_extension),
+    FEATURES(CoreR.string.section_features, CoreR.drawable.ic_hs),
     LOG(CoreR.string.logs, R.drawable.ic_bug),
     SETTINGS(CoreR.string.settings, R.drawable.ic_settings);
 }
