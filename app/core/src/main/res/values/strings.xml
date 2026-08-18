@@ -65,7 +65,7 @@
     <string name="home_uptime_format">%1$dd %2$dh %3$dm</string>
     <string name="home_su_granted_apps">Granted Apps</string>
     <string name="home_module_count">Modules</string>
-    <string name="home_execution_mode">Execution Mode</string>
+    <string name="home_execution_mode">Implementation</string>
     <string name="home_execution_mode_value">magisk</string>
     <string name="home_sysinfo_title">System Info</string>
     <string name="home_device_name">Device</string>
