@@ -2,6 +2,7 @@ package com.topjohnwu.magisk.ui.appmanager
 
 import android.annotation.SuppressLint
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import android.graphics.drawable.Drawable
@@ -108,7 +109,9 @@ class AppManagerViewModel : AsyncLoadViewModel() {
             val path = withContext(Dispatchers.IO) {
                 runCatching {
                     val f = File(AppContext.cacheDir, "install.apk")
-                    uri.inputStream().use { it.writeTo(f) }
+                    uri.inputStream().use { input ->
+                        f.outputStream().use { output -> input.copyTo(output) }
+                    }
                     f.path
                 }.getOrNull()
             }
@@ -206,7 +209,7 @@ class AppManagerViewModel : AsyncLoadViewModel() {
             targetSdk = ai.targetSdkVersion,
             firstInstallTime = info.firstInstallTime,
             lastUpdateTime = info.lastUpdateTime,
-            isSystem = ai.isSystemApp(),
+            isSystem = ai.isSystemAppCompat(),
             isEnabled = ai.enabled,
             apkSize = File(ai.sourceDir).length(),
             uid = ai.uid,

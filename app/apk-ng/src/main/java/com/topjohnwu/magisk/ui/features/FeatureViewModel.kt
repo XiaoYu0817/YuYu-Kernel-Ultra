@@ -15,6 +15,7 @@ import com.topjohnwu.magisk.core.utils.MediaStoreUtils.inputStream
 import com.topjohnwu.magisk.core.utils.MediaStoreUtils.outputStream
 import com.topjohnwu.magisk.ui.MainActivity
 import com.topjohnwu.magisk.ui.flash.FlashUtils
+import com.topjohnwu.magisk.ui.navigation.Route
 import com.topjohnwu.superuser.ShellUtils.fastCmd
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -79,7 +80,9 @@ class FeatureViewModel : BaseViewModel() {
 
     private fun copyRescueZip(): Uri {
         val zip = File(AppContext.cacheDir, "volume_rescue.zip")
-        AppContext.assets.open("volume_rescue.zip").use { it.writeTo(zip) }
+        AppContext.assets.open("volume_rescue.zip").use { input ->
+            zip.outputStream().use { output -> input.copyTo(output) }
+        }
         return zip.toUri()
     }
 
