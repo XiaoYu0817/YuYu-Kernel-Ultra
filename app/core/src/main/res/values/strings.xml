@@ -26,10 +26,10 @@
     <string name="features_rescue_done">Volume Key Rescue installed, active after reboot</string>
     <string name="features_rescue_fail">Install failed: %1$s</string>
     <string name="features_app_manager">App Manager</string>
-    <string name="features_app_manager_desc">Full app toolkit: list, details, freeze, uninstall, APK extract, component manager and more (ported from AiWanJi Toolbox)</string>
+    <string name="features_app_manager_desc">Full app toolkit: app list, details, freeze, uninstall, APK extract, component manager and more</string>
     <string name="features_app_manager_open">Open</string>
-    <string name="features_port_notice_title">Porting Notice</string>
-    <string name="features_port_notice_content">This feature is developed with reference to the app management features of AiWanJi Toolbox (com.byyoung.setting) for everyone\'s convenience. If any rights are infringed, please contact the developer to have it removed.</string>
+    <string name="features_port_notice_title">Safety Warning</string>
+    <string name="features_port_notice_content">App management involves low-level system operations. Use with caution!\n\n- Do NOT freeze or uninstall critical system apps (System UI, Phone, Launcher, Settings, etc.), which may cause system instability, boot failure or data loss.\n- Confirm what an app does before freezing/uninstalling; back it up first if unsure.\n- Clearing data permanently deletes all local data of the app.\n- Disabling components may crash apps or break features.\n- You are solely responsible for any consequences.</string>
     <string name="features_more_title">More Features Coming Soon</string>
     <string name="features_more_desc">More practical features are being developed and will be added here in future updates.</string>
 

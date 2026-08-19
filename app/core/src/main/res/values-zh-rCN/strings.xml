@@ -26,10 +26,10 @@
     <string name="features_rescue_done">音量键救砖模块安装完成，重启后生效</string>
     <string name="features_rescue_fail">安装失败：%1$s</string>
     <string name="features_app_manager">应用管理</string>
-    <string name="features_app_manager_desc">应用列表、详情、冻结、卸载、提取 APK、组件管理 等全套应用工具（参考爱玩机工具箱）</string>
+    <string name="features_app_manager_desc">应用列表、详情、冻结、卸载、提取 APK、组件管理等全套应用工具</string>
     <string name="features_app_manager_open">打开</string>
-    <string name="features_port_notice_title">移植声明</string>
-    <string name="features_port_notice_content">本功能参考爱玩机工具箱（com.byyoung.setting）的应用管理功能开发，方便大家使用。如有侵犯权益，请联系作者将其删除。</string>
+    <string name="features_port_notice_title">操作警示</string>
+    <string name="features_port_notice_content">应用管理涉及系统底层操作，请谨慎使用！\n\n- 请勿冻结、卸载系统关键应用（如系统界面、电话、桌面、设置等），否则可能导致系统异常、无法开机或数据丢失。\n- 冻结或卸载前请确认该应用的作用，不确定时建议先备份。\n- 清除数据会永久删除应用的全部本地数据，无法恢复。\n- 禁用组件可能导致应用崩溃或功能缺失。\n- 由此产生的一切后果由操作者自行承担。</string>
     <string name="features_more_title">更多实用功能等待添加</string>
     <string name="features_more_desc">更多实用功能正在开发中，将在后续版本中陆续加入。</string>
 
