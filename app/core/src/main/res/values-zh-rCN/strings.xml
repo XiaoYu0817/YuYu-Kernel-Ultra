@@ -69,8 +69,48 @@
     <string name="features_rescue_installing">正在安装…</string>
     <string name="features_rescue_done">音量键救砖模块安装完成，重启后生效</string>
     <string name="features_rescue_fail">安装失败：%1$s</string>
+    <string name="features_app_manager">应用管理</string>
+    <string name="features_app_manager_desc">应用列表、详情、冻结、卸载、提取 APK、组件管理 等全套应用工具（参考爱玩机工具箱）</string>
+    <string name="features_app_manager_open">打开</string>
+    <string name="features_port_notice_title">移植声明</string>
+    <string name="features_port_notice_content">本功能参考爱玩机工具箱（com.byyoung.setting）的应用管理功能开发，方便大家使用。如有侵犯权益，请联系作者将其删除。</string>
     <string name="features_more_title">更多实用功能等待添加</string>
     <string name="features_more_desc">更多实用功能正在开发中，将在后续版本中陆续加入。</string>
+
+    <!--App Manager-->
+    <string name="app_manager_title">应用管理</string>
+    <string name="app_manager_search_hint">搜索应用</string>
+    <string name="app_manager_install_apk">安装 APK</string>
+    <string name="app_manager_done">操作成功</string>
+    <string name="app_manager_fail">操作失败</string>
+    <string name="app_manager_extract_done">APK 已导出到下载目录</string>
+    <string name="app_manager_extract_fail">导出失败：%1$s</string>
+    <string name="app_manager_install_fail">安装失败</string>
+    <string name="app_manager_package">包名</string>
+    <string name="app_manager_version">版本</string>
+    <string name="app_manager_size">大小</string>
+    <string name="app_manager_uid">UID</string>
+    <string name="app_manager_target_sdk">目标 SDK</string>
+    <string name="app_manager_signature">签名</string>
+    <string name="app_manager_system">系统应用</string>
+    <string name="app_manager_status">状态</string>
+    <string name="app_manager_boot">自启</string>
+    <string name="app_manager_ad">广告嫌疑</string>
+    <string name="app_manager_install_time">安装时间</string>
+    <string name="app_manager_update_time">更新时间</string>
+    <string name="app_manager_freeze">冻结</string>
+    <string name="app_manager_unfreeze">解冻</string>
+    <string name="app_manager_stop">停止</string>
+    <string name="app_manager_clear_data">清除数据</string>
+    <string name="app_manager_extract">提取 APK</string>
+    <string name="app_manager_uninstall">卸载</string>
+    <string name="app_manager_components">组件</string>
+    <string name="app_manager_enable">启用</string>
+    <string name="app_manager_disable">禁用</string>
+    <string name="app_manager_enabled">已启用</string>
+    <string name="app_manager_disabled">已禁用</string>
+    <string name="app_manager_yes">是</string>
+    <string name="app_manager_no">否</string>
 
     <!--Custom background-->
     <string name="settings_background_title">自定义背景图片</string>

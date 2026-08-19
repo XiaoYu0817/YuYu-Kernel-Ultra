@@ -41,6 +41,8 @@ import com.topjohnwu.magisk.core.isRunningAsStub
 import com.topjohnwu.magisk.core.ktx.toast
 import com.topjohnwu.magisk.core.tasks.AppMigration
 import com.topjohnwu.magisk.core.wrap
+import com.topjohnwu.magisk.ui.appmanager.AppManagerScreen
+import com.topjohnwu.magisk.ui.appmanager.AppManagerViewModel
 import com.topjohnwu.magisk.ui.deny.DenyListScreen
 import com.topjohnwu.magisk.ui.deny.DenyListViewModel
 import com.topjohnwu.magisk.ui.flash.FlashScreen
@@ -128,6 +130,11 @@ class MainActivity : ComponentActivity(), SplashScreenHost {
                                     val vm: DenyListViewModel = viewModel(factory = VMFactory)
                                     LaunchedEffect(Unit) { vm.startLoading() }
                                     DenyListScreen(vm, onBack = { navigator.pop() })
+                                }
+                                entry<Route.AppManager> { _ ->
+                                    val vm: AppManagerViewModel = viewModel(factory = VMFactory)
+                                    LaunchedEffect(Unit) { vm.startLoading() }
+                                    AppManagerScreen(vm, onBack = { navigator.pop() })
                                 }
                                 entry<Route.Flash> { key ->
                                     val vm: FlashViewModel = viewModel(factory = VMFactory)

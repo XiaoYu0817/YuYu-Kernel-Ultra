@@ -122,6 +122,7 @@ fun MainScreen(initialTab: Int = Tab.HOME.ordinal) {
                 }
                 Tab.FEATURES -> {
                     val vm: FeatureViewModel = viewModel(factory = VMFactory)
+                    CollectNavEvents(vm, navigator)
                     FeatureScreen(vm)
                 }
                 Tab.MODULES -> {
