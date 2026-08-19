@@ -85,7 +85,7 @@ class AppManagerViewModel : AsyncLoadViewModel() {
             it.label.contains(q, true) || it.packageName.contains(q, true)
         }
         filtered.sortedWith(
-            compareBy<String>(String.CASE_INSENSITIVE_ORDER) { it.label }
+            compareBy(String.CASE_INSENSITIVE_ORDER) { it.label }
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
