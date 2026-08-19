@@ -25,8 +25,48 @@
     <string name="features_rescue_installing">Installing…</string>
     <string name="features_rescue_done">Volume Key Rescue installed, active after reboot</string>
     <string name="features_rescue_fail">Install failed: %1$s</string>
+    <string name="features_app_manager">App Manager</string>
+    <string name="features_app_manager_desc">Full app toolkit: list, details, freeze, uninstall, APK extract, component manager and more (ported from AiWanJi Toolbox)</string>
+    <string name="features_app_manager_open">Open</string>
+    <string name="features_port_notice_title">Porting Notice</string>
+    <string name="features_port_notice_content">This feature is developed with reference to the app management features of AiWanJi Toolbox (com.byyoung.setting) for everyone\'s convenience. If any rights are infringed, please contact the developer to have it removed.</string>
     <string name="features_more_title">More Features Coming Soon</string>
     <string name="features_more_desc">More practical features are being developed and will be added here in future updates.</string>
+
+    <!--App Manager-->
+    <string name="app_manager_title">App Manager</string>
+    <string name="app_manager_search_hint">Search apps</string>
+    <string name="app_manager_install_apk">Install APK</string>
+    <string name="app_manager_done">Done</string>
+    <string name="app_manager_fail">Operation failed</string>
+    <string name="app_manager_extract_done">APK exported to Downloads</string>
+    <string name="app_manager_extract_fail">Export failed: %1$s</string>
+    <string name="app_manager_install_fail">Install failed</string>
+    <string name="app_manager_package">Package</string>
+    <string name="app_manager_version">Version</string>
+    <string name="app_manager_size">Size</string>
+    <string name="app_manager_uid">UID</string>
+    <string name="app_manager_target_sdk">Target SDK</string>
+    <string name="app_manager_signature">Signature</string>
+    <string name="app_manager_system">System app</string>
+    <string name="app_manager_status">Status</string>
+    <string name="app_manager_boot">Auto start</string>
+    <string name="app_manager_ad">Ad suspect</string>
+    <string name="app_manager_install_time">Installed</string>
+    <string name="app_manager_update_time">Updated</string>
+    <string name="app_manager_freeze">Freeze</string>
+    <string name="app_manager_unfreeze">Unfreeze</string>
+    <string name="app_manager_stop">Stop</string>
+    <string name="app_manager_clear_data">Clear data</string>
+    <string name="app_manager_extract">Extract APK</string>
+    <string name="app_manager_uninstall">Uninstall</string>
+    <string name="app_manager_components">Components</string>
+    <string name="app_manager_enable">Enable</string>
+    <string name="app_manager_disable">Disable</string>
+    <string name="app_manager_enabled">Enabled</string>
+    <string name="app_manager_disabled">Disabled</string>
+    <string name="app_manager_yes">Yes</string>
+    <string name="app_manager_no">No</string>
 
     <!--Settings: Custom Background-->
     <string name="settings_background_title">Custom Background</string>

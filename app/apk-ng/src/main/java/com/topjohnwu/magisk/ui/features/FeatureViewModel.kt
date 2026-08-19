@@ -73,6 +73,10 @@ class FeatureViewModel : BaseViewModel() {
         }
     }
 
+    fun openAppManager() {
+        navigateTo(Route.AppManager)
+    }
+
     private fun copyRescueZip(): Uri {
         val zip = File(AppContext.cacheDir, "volume_rescue.zip")
         AppContext.assets.open("volume_rescue.zip").use { it.writeTo(zip) }

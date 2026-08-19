@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -20,11 +21,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -41,6 +45,7 @@ import com.topjohnwu.magisk.core.R as CoreR
 fun FeatureScreen(viewModel: FeatureViewModel) {
     val uiState by viewModel.uiState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    var showAppManagerNotice by rememberSaveable { mutableStateOf(false) }
 
     val launchBackup = rememberExternalStoragePermissionLauncher(
         onGranted = { viewModel.backupBoot() }
@@ -75,7 +80,70 @@ fun FeatureScreen(viewModel: FeatureViewModel) {
                 onInstall = viewModel::installVolumeRescue,
             )
 
+            AppManagerCard(
+                onOpen = { showAppManagerNotice = true }
+            )
+
             MoreFeaturesCard()
+        }
+    }
+
+    if (showAppManagerNotice) {
+        AlertDialog(
+            onDismissRequest = { showAppManagerNotice = false },
+            title = { Text(stringResource(CoreR.string.features_port_notice_title)) },
+            text = { Text(stringResource(CoreR.string.features_port_notice_content)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showAppManagerNotice = false
+                    viewModel.openAppManager()
+                }) {
+                    Text(stringResource(CoreR.string.features_app_manager_open))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAppManagerNotice = false }) {
+                    Text(stringResource(android.R.string.cancel))
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun AppManagerCard(onOpen: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = stringResource(CoreR.string.features_app_manager),
+                style = MaterialTheme.typography.titleLarge
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(CoreR.string.features_app_manager_desc),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(16.dp))
+            Button(
+                onClick = onOpen,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Icon(
+                    painter = painterResource(CoreR.drawable.ic_hs),
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(CoreR.string.features_app_manager_open))
+            }
         }
     }
 }
