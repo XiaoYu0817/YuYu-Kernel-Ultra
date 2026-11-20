@@ -235,7 +235,5 @@ class AppManagerViewModel : AsyncLoadViewModel() {
 private fun ApplicationInfo.isSystemAppCompat(): Boolean =
     (flags and ApplicationInfo.FLAG_SYSTEM) != 0
 
-private fun PackageInfo.versionCodeCompat(): Long {
-    return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P)
-        versionCodeLong else versionCode.toLong()
-}
+@Suppress("DEPRECATION")
+private fun PackageInfo.versionCodeCompat(): Long = versionCode.toLong()
