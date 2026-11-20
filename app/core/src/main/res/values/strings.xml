@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
 
     <!--Sections-->
     <string name="modules">Modules</string>
@@ -32,6 +32,16 @@
     <string name="features_port_notice_content">App management involves low-level system operations. Use with caution!\n\n- Do NOT freeze or uninstall critical system apps (System UI, Phone, Launcher, Settings, etc.), which may cause system instability, boot failure or data loss.\n- Confirm what an app does before freezing/uninstalling; back it up first if unsure.\n- Clearing data permanently deletes all local data of the app.\n- Disabling components may crash apps or break features.\n- You are solely responsible for any consequences.</string>
     <string name="features_more_title">More Features Coming Soon</string>
     <string name="features_more_desc">More practical features are being developed and will be added here in future updates.</string>
+    <string name="features_packs_title">Installable features</string>
+    <string name="features_packs_desc">Add a folder under /data/adb/yuyu/features/&lt;id&gt;/ with feature.prop and run.sh, or ship it inside a module as yuyu/features/&lt;id&gt;/. New features then work without rebuilding the app.</string>
+    <string name="features_packs_empty">No feature packages found</string>
+    <string name="features_packs_run">Run</string>
+    <string name="features_packs_running">Running…</string>
+    <string name="features_packs_refresh">Refresh</string>
+    <string name="features_packs_output">Output</string>
+    <string name="features_packs_output_empty">No output</string>
+    <string name="features_packs_failed">Failed</string>
+    <string name="features_packs_local">Local</string>
 
     <!--App Manager-->
     <string name="app_manager_title">App Manager</string>
@@ -73,6 +83,13 @@
     <string name="settings_background_summary_set">Background image is set</string>
     <string name="settings_background_summary_none">Set a custom background image</string>
     <string name="settings_background_clear">Remove Background</string>
+
+    <!--Liquid glass-->
+    <string name="settings_glass_title">Liquid glass</string>
+    <string name="settings_glass_summary">Glass style for cards and navigation bar</string>
+    <string name="settings_glass_off">Off</string>
+    <string name="settings_glass_gradient">Translucent gradient</string>
+    <string name="settings_glass_blur">Frosted glass (blurred background)</string>
 
     <!--Home-->
     <string name="no_connection">No connection available</string>

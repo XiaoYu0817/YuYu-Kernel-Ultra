@@ -2,6 +2,7 @@ package com.topjohnwu.magisk.ui.appmanager
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,12 +45,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import java.util.Date
 import java.text.SimpleDateFormat
 import java.util.Locale
+import com.topjohnwu.magisk.R
 import com.topjohnwu.magisk.core.R as CoreR
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -144,9 +147,15 @@ private fun AppRow(app: AppEntry, onClick: () -> Unit) {
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        app.icon?.let {
+        if (app.icon != null) {
+            Image(
+                painter = rememberDrawablePainter(app.icon),
+                contentDescription = null,
+                modifier = Modifier.size(40.dp)
+            )
+        } else {
             Icon(
-                painter = rememberDrawablePainter(it),
+                painter = painterResource(R.drawable.ic_manager),
                 contentDescription = null,
                 modifier = Modifier.size(40.dp)
             )
