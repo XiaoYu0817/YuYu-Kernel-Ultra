@@ -46,12 +46,12 @@ object Config : PreferenceConfig, DBConfig {
         const val ASKED_HOME = "asked_home"
         const val DOH = "doh"
         const val RAND_NAME = "rand_name"
-        const val YUYU_GLASS = "yuyu_glass_effect"
+        const val YUYU_GLASS_MODE = "yuyu_glass_mode"
         const val YUYU_AGREEMENT = "yuyu_user_agreement"
         const val YUYU_BACKGROUND = "yuyu_background_image"
 
         val NO_MIGRATION = setOf(ASKED_HOME, SU_REQUEST_TIMEOUT,
-            SU_AUTO_RESPONSE, SU_REAUTH, SU_TAPJACK, YUYU_AGREEMENT, YUYU_GLASS, YUYU_BACKGROUND)
+            SU_AUTO_RESPONSE, SU_REAUTH, SU_TAPJACK, YUYU_AGREEMENT, YUYU_GLASS_MODE, YUYU_BACKGROUND)
     }
 
     object OldValue {
@@ -71,6 +71,11 @@ object Config : PreferenceConfig, DBConfig {
         const val BETA_CHANNEL = 1
         const val DEBUG_CHANNEL = 2
         const val CUSTOM_CHANNEL = 3
+
+        // glass effect modes
+        const val GLASS_NONE = 0
+        const val GLASS_GRADIENT = 1
+        const val GLASS_BLUR = 2
 
         // root access mode
         const val ROOT_ACCESS_DISABLED = 0
@@ -114,7 +119,7 @@ object Config : PreferenceConfig, DBConfig {
     var darkTheme by preference(Key.DARK_THEME, -1)
     var themeOrdinal by preference(Key.THEME_ORDINAL, 0)
     var colorMode by preference(Key.COLOR_MODE, 0)
-    var glassEffect by preference(Key.YUYU_GLASS, false)
+    var glassMode by preference(Key.YUYU_GLASS_MODE, Value.GLASS_NONE)
     var yuyuAgreementAccepted by preference(Key.YUYU_AGREEMENT, false)
     var backgroundImage by preference(Key.YUYU_BACKGROUND, "")
 

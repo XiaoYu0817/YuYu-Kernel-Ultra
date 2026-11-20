@@ -1,4 +1,4 @@
-package com.topjohnwu.magisk.ui.home
+﻿package com.topjohnwu.magisk.ui.home
 
 import android.app.ActivityManager
 import android.content.Context
@@ -34,7 +34,6 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -83,6 +82,7 @@ import com.topjohnwu.magisk.core.ktx.toast
 import com.topjohnwu.magisk.core.tasks.AppMigration
 import com.topjohnwu.magisk.core.tasks.MagiskInstaller
 import com.topjohnwu.magisk.ui.MainActivity
+import com.topjohnwu.magisk.ui.component.GlassCard
 import com.topjohnwu.magisk.ui.component.LoadingDialogHandle
 import com.topjohnwu.magisk.ui.component.MarkdownTextAsync
 import com.topjohnwu.magisk.ui.component.rememberLoadingDialog
@@ -547,7 +547,7 @@ private fun CoreCard(
         HomeViewModel.State.LOADING -> null
     }
 
-    Card(
+    GlassCard(
         modifier = modifier,
         shape = RoundedCornerShape(24.dp)
     ) {
@@ -639,7 +639,7 @@ private fun AppCard(
         else -> null
     }
 
-    Card(
+    GlassCard(
         modifier = modifier,
         shape = RoundedCornerShape(24.dp)
     ) {
@@ -748,7 +748,7 @@ private fun OverviewCard(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Card(
+        GlassCard(
             modifier = Modifier
                 .weight(1f)
                 .height(IntrinsicSize.Min),
@@ -769,7 +769,7 @@ private fun OverviewCard(
                 )
             }
         }
-        Card(
+        GlassCard(
             modifier = Modifier
                 .weight(1f)
                 .height(IntrinsicSize.Min),
@@ -821,7 +821,7 @@ private fun formatUptime(millis: Long): String {
 
 @Composable
 private fun StatusRowCard(statuses: List<StatusInfo>) {
-    Card(
+    GlassCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp)
     ) {
@@ -866,7 +866,7 @@ private fun SystemInfoCard(
     kernelVersion: String,
     selinuxStatus: String,
 ) {
-    Card(
+    GlassCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp)
     ) {
@@ -902,7 +902,7 @@ private fun SystemInfoCard(
 
 @Composable
 private fun SupportCard(onLinkClicked: (String) -> Unit) {
-    Card(
+    GlassCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp)
     ) {
@@ -968,7 +968,7 @@ private val developers = listOf(
 
 @Composable
 private fun DevelopersCard(onLinkClicked: (String) -> Unit) {
-    Card(
+    GlassCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp)
     ) {

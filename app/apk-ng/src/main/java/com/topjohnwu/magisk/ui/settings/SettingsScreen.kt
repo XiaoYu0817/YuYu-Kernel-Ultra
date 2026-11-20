@@ -1,4 +1,4 @@
-package com.topjohnwu.magisk.ui.settings
+﻿package com.topjohnwu.magisk.ui.settings
 
 import android.content.Intent
 import android.os.Build
@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -44,6 +43,7 @@ import com.topjohnwu.magisk.core.isRunningAsStub
 import com.topjohnwu.magisk.core.utils.LocaleSetting
 import com.topjohnwu.magisk.core.utils.MediaStoreUtils
 import com.topjohnwu.magisk.ui.ThemeState
+import com.topjohnwu.magisk.ui.component.GlassCard
 import com.topjohnwu.magisk.ui.component.SettingsArrow
 import com.topjohnwu.magisk.ui.component.SettingsDropdown
 import com.topjohnwu.magisk.ui.component.SettingsSwitch
@@ -95,7 +95,7 @@ private fun CustomizationSection(viewModel: SettingsViewModel) {
     val context = LocalContext.current
 
     SmallTitle(text = stringResource(CoreR.string.settings_customization))
-    Card(modifier = Modifier.fillMaxWidth()) {
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
         if (LocaleSetting.useLocaleManager) {
             val locale = LocaleSetting.instance.appLocale
             val summary = locale?.getDisplayName(locale) ?: stringResource(CoreR.string.system_default)
@@ -191,7 +191,7 @@ private fun AppSettingsSection() {
     val resources = LocalResources.current
 
     SmallTitle(text = stringResource(CoreR.string.home_app_title))
-    Card(modifier = Modifier.fillMaxWidth()) {
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
         // Update Channel
         val updateChannelEntries = remember {
             resources.getStringArray(CoreR.array.update_channel).toList()
@@ -253,15 +253,20 @@ private fun AppSettingsSection() {
         )
 
         // YuYu Glass Effect
-        var glassEffect by remember { mutableStateOf(Config.glassEffect) }
-        SettingsSwitch(
-            title = "液态玻璃效果",
-            summary = "开启后卡片与底部导航栏将变为半透明玻璃风格",
-            checked = glassEffect,
-            onCheckedChange = { newValue ->
-                glassEffect = newValue
-                Config.glassEffect = newValue
-                ThemeState.glassEffect = newValue
+        var glassMode by remember { mutableIntStateOf(ThemeState.glassMode) }
+        SettingsDropdown(
+            title = stringResource(CoreR.string.settings_glass_title),
+            summary = stringResource(CoreR.string.settings_glass_summary),
+            items = listOf(
+                stringResource(CoreR.string.settings_glass_off),
+                stringResource(CoreR.string.settings_glass_gradient),
+                stringResource(CoreR.string.settings_glass_blur)
+            ),
+            selectedIndex = glassMode,
+            onSelectedIndexChange = { index ->
+                glassMode = index
+                Config.glassMode = index
+                ThemeState.glassMode = index
             }
         )
 
@@ -298,7 +303,7 @@ private fun AppSettingsSection() {
 @Composable
 private fun MagiskSection(viewModel: SettingsViewModel) {
     SmallTitle(text = stringResource(CoreR.string.magisk))
-    Card(modifier = Modifier.fillMaxWidth()) {
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
         // Systemless Hosts
         SettingsArrow(
             title = stringResource(CoreR.string.settings_hosts_title),
@@ -350,7 +355,7 @@ private fun SuperuserSection(viewModel: SettingsViewModel) {
     val resources = LocalResources.current
 
     SmallTitle(text = stringResource(CoreR.string.superuser))
-    Card(modifier = Modifier.fillMaxWidth()) {
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
         // Tapjack (SDK < S)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             var tapjack by remember { mutableStateOf(Config.suTapjack) }
@@ -525,7 +530,7 @@ private fun AgreementSection() {
     var showAgreement by remember { mutableStateOf(false) }
 
     SmallTitle(text = stringResource(CoreR.string.home_support_title))
-    Card(modifier = Modifier.fillMaxWidth()) {
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
         SettingsArrow(
             title = stringResource(CoreR.string.yuyu_agreement_title),
             summary = stringResource(CoreR.string.yuyu_agreement_view_hint),

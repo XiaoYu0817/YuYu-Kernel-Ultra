@@ -16,6 +16,7 @@ import com.topjohnwu.magisk.core.utils.MediaStoreUtils.outputStream
 import com.topjohnwu.magisk.ui.MainActivity
 import com.topjohnwu.magisk.ui.flash.FlashUtils
 import com.topjohnwu.magisk.ui.navigation.Route
+import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.ShellUtils.fastCmd
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,8 +38,95 @@ class FeatureViewModel : BaseViewModel() {
         val installingRescue: Boolean = false,
     )
 
+    data class FeaturePack(
+        val id: String,
+        val path: String,
+        val name: String,
+        val desc: String,
+        val button: String,
+        val source: String,
+        val order: Int,
+    )
+
+    data class PackOutput(
+        val title: String,
+        val success: Boolean,
+        val text: String,
+    )
+
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    private val _packs = MutableStateFlow<List<FeaturePack>>(emptyList())
+    val packs: StateFlow<List<FeaturePack>> = _packs.asStateFlow()
+
+    private val _packsLoading = MutableStateFlow(true)
+    val packsLoading: StateFlow<Boolean> = _packsLoading.asStateFlow()
+
+    private val _runningPack = MutableStateFlow<String?>(null)
+    val runningPack: StateFlow<String?> = _runningPack.asStateFlow()
+
+    private val _packOutput = MutableStateFlow<PackOutput?>(null)
+    val packOutput: StateFlow<PackOutput?> = _packOutput.asStateFlow()
+
+    fun loadPacks() {
+        viewModelScope.launch {
+            _packsLoading.value = true
+            _packs.value = withContext(Dispatchers.IO) {
+                runCatching { scanPacks() }.getOrDefault(emptyList())
+            }
+            _packsLoading.value = false
+        }
+    }
+
+    fun runPack(pack: FeaturePack) {
+        if (_runningPack.value != null) return
+        viewModelScope.launch {
+            _runningPack.value = pack.id
+            val result = withContext(Dispatchers.IO) {
+                Shell.cmd("cd '${pack.path}' && sh run.sh 2>&1").exec()
+            }
+            _runningPack.value = null
+            val text = (result.out + result.err).filter { it.isNotBlank() }.joinToString("\n")
+            _packOutput.value = PackOutput(pack.name, result.isSuccess, text)
+            if (result.isSuccess) loadPacks()
+        }
+    }
+
+    fun dismissPackOutput() {
+        _packOutput.value = null
+    }
+
+    private fun scanPacks(): List<FeaturePack> {
+        val dirs = fastCmd(
+            "ls -d /data/adb/yuyu/features/* /data/adb/modules/*/yuyu/features/* 2>/dev/null"
+        ).lineSequence().map { it.trim() }.filter { it.isNotEmpty() }.toList()
+        return dirs.mapNotNull { dir ->
+            val prop = fastCmd("cat '$dir/feature.prop' 2>/dev/null")
+            if (prop.isBlank()) return@mapNotNull null
+            val map = prop.lineSequence()
+                .mapNotNull { line ->
+                    val i = line.indexOf('=')
+                    if (i <= 0) null else line.substring(0, i).trim() to line.substring(i + 1).trim()
+                }
+                .toMap()
+            val segments = dir.split("/")
+            val source = if (dir.startsWith("/data/adb/yuyu/features/")) {
+                "local"
+            } else {
+                segments.getOrNull(4).orEmpty()
+            }
+            FeaturePack(
+                id = "$source/${segments.last()}",
+                path = dir,
+                name = map["name"] ?: segments.last(),
+                desc = map["desc"].orEmpty(),
+                button = map["button"].orEmpty(),
+                source = source,
+                order = map["order"]?.toIntOrNull() ?: 100,
+            )
+        }.sortedWith(compareBy({ it.order }, { it.name }))
+    }
 
     fun backupBoot() {
         viewModelScope.launch {
