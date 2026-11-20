@@ -1,4 +1,4 @@
-﻿<resources>
+<resources>
 
     <!--Sections-->
     <string name="modules">Modules</string>
@@ -90,6 +90,35 @@
     <string name="settings_glass_off">Off</string>
     <string name="settings_glass_gradient">Translucent gradient</string>
     <string name="settings_glass_blur">Frosted glass (blurred background)</string>
+
+    <!--Developer options-->
+    <string name="settings_developer_section">Developer</string>
+    <string name="settings_developer_options">Developer options</string>
+    <string name="settings_developer_options_summary">Password protected UI tweaks and factory reset</string>
+    <string name="dev_password_title">Developer options</string>
+    <string name="dev_password_message">Enter the developer password to continue.</string>
+    <string name="dev_password_hint">Password</string>
+    <string name="dev_password_error">Wrong password</string>
+    <string name="dev_password_confirm">Unlock</string>
+    <string name="dev_appearance">Appearance</string>
+    <string name="dev_primary_color">Accent color</string>
+    <string name="dev_default">Default</string>
+    <string name="dev_card_radius">Card corner radius</string>
+    <string name="dev_font_scale">Font scale</string>
+    <string name="dev_glass_alpha_dark">Glass opacity (dark)</string>
+    <string name="dev_glass_alpha_light">Glass opacity (light)</string>
+    <string name="dev_scrim_dark">Background dim (dark)</string>
+    <string name="dev_scrim_light">Background dim (light)</string>
+    <string name="dev_navigation">Navigation bar</string>
+    <string name="dev_nav_height">Bar height</string>
+    <string name="dev_nav_labels">Show labels</string>
+    <string name="dev_nav_order">Tab order</string>
+    <string name="dev_move_up">Move up</string>
+    <string name="dev_move_down">Move down</string>
+    <string name="dev_reset_title">Factory reset</string>
+    <string name="dev_reset_summary">Restore every YuYu appearance setting to default</string>
+    <string name="dev_reset_button">Reset</string>
+    <string name="dev_reset_confirm">All YuYu customizations (theme, glass, background image, developer overrides) will be cleared and the app will restart. Continue?</string>
 
     <!--Home-->
     <string name="no_connection">No connection available</string>

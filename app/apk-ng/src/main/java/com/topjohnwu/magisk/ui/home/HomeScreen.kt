@@ -549,7 +549,6 @@ private fun CoreCard(
 
     GlassCard(
         modifier = modifier,
-        shape = RoundedCornerShape(24.dp)
     ) {
         Row(
             modifier = Modifier
@@ -641,7 +640,6 @@ private fun AppCard(
 
     GlassCard(
         modifier = modifier,
-        shape = RoundedCornerShape(24.dp)
     ) {
         Column(
             modifier = Modifier
@@ -752,7 +750,6 @@ private fun OverviewCard(
             modifier = Modifier
                 .weight(1f)
                 .height(IntrinsicSize.Min),
-            shape = RoundedCornerShape(24.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -773,7 +770,6 @@ private fun OverviewCard(
             modifier = Modifier
                 .weight(1f)
                 .height(IntrinsicSize.Min),
-            shape = RoundedCornerShape(24.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -823,7 +819,6 @@ private fun formatUptime(millis: Long): String {
 private fun StatusRowCard(statuses: List<StatusInfo>) {
     GlassCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp)
     ) {
         Row(
             modifier = Modifier
@@ -868,7 +863,6 @@ private fun SystemInfoCard(
 ) {
     GlassCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp)
     ) {
         Column(
             modifier = Modifier
@@ -904,7 +898,6 @@ private fun SystemInfoCard(
 private fun SupportCard(onLinkClicked: (String) -> Unit) {
     GlassCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
@@ -970,7 +963,6 @@ private val developers = listOf(
 private fun DevelopersCard(onLinkClicked: (String) -> Unit) {
     GlassCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp)
     ) {
         Column {
             developers.forEachIndexed { index, dev ->

@@ -30,6 +30,10 @@ class SettingsViewModel : BaseViewModel() {
         navigateTo(Route.DenyList)
     }
 
+    fun navigateToDeveloperOptions() {
+        navigateTo(Route.DeveloperOptions)
+    }
+
     fun requestAddShortcut() {
         Shortcuts.addHomeIcon(AppContext)
     }

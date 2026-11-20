@@ -31,6 +31,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import com.topjohnwu.magisk.core.Config
 import com.topjohnwu.magisk.core.Config.Value.GLASS_BLUR
@@ -46,6 +48,31 @@ val YuYuThemeBlue = Color(0xFF91D5FF)
 object ThemeState {
     var colorMode by mutableIntStateOf(Config.colorMode)
     var glassMode by mutableIntStateOf(Config.glassMode)
+    var cardRadius by mutableIntStateOf(Config.devCardRadius)
+    var fontScale by mutableIntStateOf(Config.devFontScale)
+    var primaryColor by mutableIntStateOf(Config.devPrimaryColor)
+    var glassAlphaDark by mutableIntStateOf(Config.devGlassAlphaDark)
+    var glassAlphaLight by mutableIntStateOf(Config.devGlassAlphaLight)
+    var scrimDark by mutableIntStateOf(Config.devScrimDark)
+    var scrimLight by mutableIntStateOf(Config.devScrimLight)
+    var navHeight by mutableIntStateOf(Config.devNavHeight)
+    var navLabels by mutableStateOf(Config.devNavLabels)
+    var navOrder by mutableStateOf(Config.devNavOrder)
+
+    fun resetToDefaults() {
+        colorMode = Config.colorMode
+        glassMode = Config.glassMode
+        cardRadius = 24
+        fontScale = 100
+        primaryColor = 0
+        glassAlphaDark = 55
+        glassAlphaLight = 80
+        scrimDark = 35
+        scrimLight = 10
+        navHeight = 64
+        navLabels = true
+        navOrder = ""
+    }
 }
 
 @Composable
@@ -68,16 +95,24 @@ fun MagiskTheme(
     }
 
     val useDynamicColor = mode in listOf(3, 4, 5) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val primary = if (ThemeState.primaryColor != 0) Color(ThemeState.primaryColor) else YuYuThemeBlue
 
-    val baseColorScheme = when {
+    val rawColorScheme = when {
         useDynamicColor && isDarkTheme -> dynamicDarkColorScheme(context)
         useDynamicColor && !isDarkTheme -> dynamicLightColorScheme(context)
-        isDarkTheme -> darkColorScheme(primary = YuYuThemeBlue)
-        else -> lightColorScheme(primary = YuYuThemeBlue)
+        isDarkTheme -> darkColorScheme(primary = primary)
+        else -> lightColorScheme(primary = primary)
     }
+    val baseColorScheme = if (ThemeState.primaryColor != 0) {
+        rawColorScheme.copy(
+            primary = primary,
+            primaryContainer = primary.copy(alpha = 0.30f)
+        )
+    } else rawColorScheme
 
     val finalColorScheme = if (glassMode != GLASS_NONE) {
-        val a = if (isDarkTheme) 0.55f else 0.80f
+        val a = if (isDarkTheme) ThemeState.glassAlphaDark / 100f
+        else ThemeState.glassAlphaLight / 100f
         baseColorScheme.copy(
             surface = baseColorScheme.surface.copy(alpha = a),
             surfaceVariant = baseColorScheme.surfaceVariant.copy(alpha = a),
@@ -112,35 +147,50 @@ fun MagiskTheme(
         }
     }
 
+    val baseDensity = LocalDensity.current
+    val scaledDensity = remember(baseDensity, ThemeState.fontScale) {
+        Density(
+            density = baseDensity.density,
+            fontScale = baseDensity.fontScale * (ThemeState.fontScale / 100f)
+        )
+    }
+
     MaterialTheme(
         colorScheme = finalColorScheme,
         content = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .onGloballyPositioned { rootSize = it.size }
-            ) {
-                val bmp = background
-                if (bmp != null) {
-                    Image(
-                        bitmap = bmp.asImageBitmap(),
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                    // Scrim to keep content readable regardless of the image brightness
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = if (isDarkTheme) 0.35f else 0.10f))
-                    )
-                }
-                val currentBackdrop = backdrop
-                CompositionLocalProvider(
-                    LocalGlassBackdrop provides if (currentBackdrop == null) null
-                    else GlassBackdrop(currentBackdrop, rootSize.width, rootSize.height)
+            CompositionLocalProvider(LocalDensity provides scaledDensity) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .onGloballyPositioned { rootSize = it.size }
                 ) {
-                    content()
+                    val bmp = background
+                    if (bmp != null) {
+                        Image(
+                            bitmap = bmp.asImageBitmap(),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                        // Scrim to keep content readable regardless of the image brightness
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Color.Black.copy(
+                                        alpha = (if (isDarkTheme) ThemeState.scrimDark
+                                        else ThemeState.scrimLight) / 100f
+                                    )
+                                )
+                        )
+                    }
+                    val currentBackdrop = backdrop
+                    CompositionLocalProvider(
+                        LocalGlassBackdrop provides if (currentBackdrop == null) null
+                        else GlassBackdrop(currentBackdrop, rootSize.width, rootSize.height)
+                    ) {
+                        content()
+                    }
                 }
             }
         }

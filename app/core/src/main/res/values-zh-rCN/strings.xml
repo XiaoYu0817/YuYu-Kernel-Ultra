@@ -1,4 +1,4 @@
-﻿<resources>
+<resources>
 
     <!--Sections-->
     <string name="modules">模块</string>
@@ -90,6 +90,35 @@
     <string name="settings_glass_off">关闭</string>
     <string name="settings_glass_gradient">半透明渐变</string>
     <string name="settings_glass_blur">毛玻璃（模糊背景）</string>
+
+    <!--Developer options-->
+    <string name="settings_developer_section">开发者</string>
+    <string name="settings_developer_options">开发者选项</string>
+    <string name="settings_developer_options_summary">密码保护的界面微调与恢复出厂设置</string>
+    <string name="dev_password_title">开发者选项</string>
+    <string name="dev_password_message">请输入开发者密码以继续。</string>
+    <string name="dev_password_hint">密码</string>
+    <string name="dev_password_error">密码错误</string>
+    <string name="dev_password_confirm">解锁</string>
+    <string name="dev_appearance">外观</string>
+    <string name="dev_primary_color">主题主色</string>
+    <string name="dev_default">默认</string>
+    <string name="dev_card_radius">卡片圆角</string>
+    <string name="dev_font_scale">字体缩放</string>
+    <string name="dev_glass_alpha_dark">玻璃不透明度（深色）</string>
+    <string name="dev_glass_alpha_light">玻璃不透明度（浅色）</string>
+    <string name="dev_scrim_dark">背景压暗（深色）</string>
+    <string name="dev_scrim_light">背景压暗（浅色）</string>
+    <string name="dev_navigation">底部导航栏</string>
+    <string name="dev_nav_height">栏高度</string>
+    <string name="dev_nav_labels">显示文字</string>
+    <string name="dev_nav_order">标签顺序</string>
+    <string name="dev_move_up">上移</string>
+    <string name="dev_move_down">下移</string>
+    <string name="dev_reset_title">恢复出厂设置</string>
+    <string name="dev_reset_summary">把全部 YuYu 外观设置恢复为默认值</string>
+    <string name="dev_reset_button">恢复</string>
+    <string name="dev_reset_confirm">将清空全部 YuYu 自定义（主题、玻璃、背景图、开发者微调）并重启应用，是否继续？</string>
 
     <!--Home-->
     <string name="no_connection">无法连接</string>
