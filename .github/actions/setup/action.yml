@@ -49,15 +49,22 @@ runs:
         SCCACHE_CACHE_SIZE: ${{ inputs.is-asset-build == 'true' && '2G' || '300M'  }}
         SCCACHE_IDLE_TIMEOUT: 0
       run: |
-        bash $GITHUB_ACTION_PATH/sccache.sh
-        sccache --start-server
-        sccache -z
+        if ! bash $GITHUB_ACTION_PATH/sccache.sh; then
+          echo "::warning::sccache setup failed, building without it"
+        fi
+        if command -v sccache > /dev/null 2>&1 && sccache --version > /dev/null 2>&1; then
+          sccache --start-server
+          sccache -z
+        else
+          rm -f /usr/local/bin/sccache
+          echo "sccache unavailable, compilation cache disabled"
+        fi
 
     - name: Show sccache stats
       uses: gacts/run-and-post-run@v1
       with:
-        run: sccache -s
-        post: sccache -s
+        run: sccache -s || true
+        post: sccache -s || true
 
     - name: Set GRADLE_USER_HOME
       shell: bash
