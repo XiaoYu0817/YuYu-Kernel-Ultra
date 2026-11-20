@@ -1,4 +1,4 @@
-package com.topjohnwu.magisk.ui.features
+﻿package com.topjohnwu.magisk.ui.features
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -184,7 +184,6 @@ private fun PacksCard(
 ) {
     GlassCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp)
     ) {
         Column(
             modifier = Modifier
@@ -276,7 +275,6 @@ private fun PacksCard(
 private fun AppManagerCard(onOpen: () -> Unit) {
     GlassCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp)
     ) {
         Column(
             modifier = Modifier
@@ -318,7 +316,6 @@ private fun BackupBootCard(
 ) {
     GlassCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp)
     ) {
         Column(
             modifier = Modifier
@@ -367,7 +364,6 @@ private fun VolumeRescueCard(
 ) {
     GlassCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp)
     ) {
         Column(
             modifier = Modifier
@@ -413,7 +409,6 @@ private fun VolumeRescueCard(
 private fun MoreFeaturesCard() {
     GlassCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp)
     ) {
         Column(
             modifier = Modifier

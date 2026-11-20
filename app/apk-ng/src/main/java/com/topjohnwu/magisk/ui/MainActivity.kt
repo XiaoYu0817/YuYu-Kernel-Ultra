@@ -45,6 +45,7 @@ import com.topjohnwu.magisk.ui.appmanager.AppManagerScreen
 import com.topjohnwu.magisk.ui.appmanager.AppManagerViewModel
 import com.topjohnwu.magisk.ui.deny.DenyListScreen
 import com.topjohnwu.magisk.ui.deny.DenyListViewModel
+import com.topjohnwu.magisk.ui.dev.DeveloperOptionsScreen
 import com.topjohnwu.magisk.ui.flash.FlashScreen
 import com.topjohnwu.magisk.ui.flash.FlashUtils
 import com.topjohnwu.magisk.ui.flash.FlashViewModel
@@ -135,6 +136,9 @@ class MainActivity : ComponentActivity(), SplashScreenHost {
                                     val vm: AppManagerViewModel = viewModel(factory = VMFactory)
                                     LaunchedEffect(Unit) { vm.startLoading() }
                                     AppManagerScreen(vm, onBack = { navigator.pop() })
+                                }
+                                entry<Route.DeveloperOptions> {
+                                    DeveloperOptionsScreen(onBack = { navigator.pop() })
                                 }
                                 entry<Route.Flash> { key ->
                                     val vm: FlashViewModel = viewModel(factory = VMFactory)

@@ -51,7 +51,7 @@ val LocalGlassBackdrop = compositionLocalOf<GlassBackdrop?> { null }
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(24.dp),
+    shape: Shape = RoundedCornerShape(ThemeState.cardRadius.dp),
     content: @Composable BoxScope.() -> Unit,
 ) {
     val mode = ThemeState.glassMode

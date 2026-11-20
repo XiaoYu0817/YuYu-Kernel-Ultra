@@ -83,6 +83,8 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                 SuperuserSection(viewModel)
             }
             Spacer(Modifier.height(12.dp))
+            DeveloperSection(viewModel)
+            Spacer(Modifier.height(12.dp))
             AgreementSection()
         }
     }
@@ -520,6 +522,20 @@ private fun SuperuserSection(viewModel: SettingsViewModel) {
                 }
             )
         }
+    }
+}
+
+// --- Developer ---
+
+@Composable
+private fun DeveloperSection(viewModel: SettingsViewModel) {
+    SmallTitle(text = stringResource(CoreR.string.settings_developer_section))
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
+        SettingsArrow(
+            title = stringResource(CoreR.string.settings_developer_options),
+            summary = stringResource(CoreR.string.settings_developer_options_summary),
+            onClick = { viewModel.navigateToDeveloperOptions() }
+        )
     }
 }
 

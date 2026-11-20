@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -65,9 +66,9 @@ import kotlinx.coroutines.launch
 import com.topjohnwu.magisk.core.R as CoreR
 
 enum class Tab(val titleRes: Int, val iconRes: Int) {
-    MODULES(CoreR.string.modules, R.drawable.ic_module),
-    SUPERUSER(CoreR.string.superuser, CoreR.drawable.ic_superuser),
     HOME(CoreR.string.section_home, R.drawable.ic_home),
+    SUPERUSER(CoreR.string.superuser, CoreR.drawable.ic_superuser),
+    MODULES(CoreR.string.modules, R.drawable.ic_module),
     FEATURES(CoreR.string.section_features, CoreR.drawable.ic_hs),
     LOG(CoreR.string.logs, R.drawable.ic_bug),
     SETTINGS(CoreR.string.settings, R.drawable.ic_settings);
@@ -76,80 +77,89 @@ enum class Tab(val titleRes: Int, val iconRes: Int) {
 @Composable
 fun MainScreen(initialTab: Int = Tab.HOME.ordinal) {
     val navigator = LocalNavigator.current
-    val visibleTabs = remember {
-        Tab.entries.filter { tab ->
-            when (tab) {
-                Tab.SUPERUSER -> Info.showSuperUser
-                Tab.MODULES -> Info.env.isActive && LocalModule.loaded()
-                else -> true
+    val navOrder = ThemeState.navOrder
+    val visibleTabs = remember(navOrder) {
+        val order = navOrder.split(",").filter { it.isNotBlank() }
+        Tab.entries
+            .sortedBy { tab ->
+                order.indexOf(tab.name).let { if (it < 0) order.size + tab.ordinal else it }
             }
-        }
+            .filter { tab ->
+                when (tab) {
+                    Tab.SUPERUSER -> Info.showSuperUser
+                    Tab.MODULES -> Info.env.isActive && LocalModule.loaded()
+                    else -> true
+                }
+            }
     }
     val initialPage = visibleTabs.indexOf(Tab.entries[initialTab]).coerceAtLeast(0)
-    val pagerState = rememberPagerState(initialPage = initialPage, pageCount = { visibleTabs.size })
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxSize(),
-            beyondViewportPageCount = visibleTabs.size - 1,
-            userScrollEnabled = true,
-        ) { page ->
-            when (visibleTabs[page]) {
-                Tab.HOME -> {
-                    val vm: HomeViewModel = viewModel(factory = VMFactory)
-                    val installVm: InstallViewModel = viewModel(factory = VMFactory)
-                    LaunchedEffect(Unit) { vm.startLoading() }
-                    CollectNavEvents(vm, navigator)
-                    CollectNavEvents(installVm, navigator)
-                    HomeScreen(vm, installVm)
-                }
-                Tab.SUPERUSER -> {
-                    val activity = LocalActivity.current as MainActivity
-                    val vm: SuperuserViewModel = viewModel(viewModelStoreOwner = activity, factory = VMFactory)
-                    LaunchedEffect(Unit) {
-                        vm.authenticate = { onSuccess ->
-                            activity.extension.withAuthentication { if (it) onSuccess() }
-                        }
-                        vm.startLoading()
+    key(visibleTabs.joinToString(",") { it.name }) {
+        val pagerState = rememberPagerState(initialPage = initialPage, pageCount = { visibleTabs.size })
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize(),
+                beyondViewportPageCount = visibleTabs.size - 1,
+                userScrollEnabled = true,
+            ) { page ->
+                when (visibleTabs[page]) {
+                    Tab.HOME -> {
+                        val vm: HomeViewModel = viewModel(factory = VMFactory)
+                        val installVm: InstallViewModel = viewModel(factory = VMFactory)
+                        LaunchedEffect(Unit) { vm.startLoading() }
+                        CollectNavEvents(vm, navigator)
+                        CollectNavEvents(installVm, navigator)
+                        HomeScreen(vm, installVm)
                     }
-                    SuperuserScreen(vm)
-                }
-                Tab.LOG -> {
-                    val vm: LogViewModel = viewModel(factory = VMFactory)
-                    LaunchedEffect(Unit) { vm.startLoading() }
-                    LogScreen(vm)
-                }
-                Tab.FEATURES -> {
-                    val vm: FeatureViewModel = viewModel(factory = VMFactory)
-                    CollectNavEvents(vm, navigator)
-                    FeatureScreen(vm)
-                }
-                Tab.MODULES -> {
-                    val vm: ModuleViewModel = viewModel(factory = VMFactory)
-                    LaunchedEffect(Unit) { vm.startLoading() }
-                    CollectNavEvents(vm, navigator)
-                    ModuleScreen(vm)
-                }
-                Tab.SETTINGS -> {
-                    val activity = LocalActivity.current as MainActivity
-                    val vm: SettingsViewModel = viewModel(factory = VMFactory)
-                    LaunchedEffect(Unit) {
-                        vm.authenticate = { onSuccess ->
-                            activity.extension.withAuthentication { if (it) onSuccess() }
+                    Tab.SUPERUSER -> {
+                        val activity = LocalActivity.current as MainActivity
+                        val vm: SuperuserViewModel = viewModel(viewModelStoreOwner = activity, factory = VMFactory)
+                        LaunchedEffect(Unit) {
+                            vm.authenticate = { onSuccess ->
+                                activity.extension.withAuthentication { if (it) onSuccess() }
+                            }
+                            vm.startLoading()
                         }
+                        SuperuserScreen(vm)
                     }
-                    CollectNavEvents(vm, navigator)
-                    SettingsScreen(vm)
+                    Tab.LOG -> {
+                        val vm: LogViewModel = viewModel(factory = VMFactory)
+                        LaunchedEffect(Unit) { vm.startLoading() }
+                        LogScreen(vm)
+                    }
+                    Tab.FEATURES -> {
+                        val vm: FeatureViewModel = viewModel(factory = VMFactory)
+                        CollectNavEvents(vm, navigator)
+                        FeatureScreen(vm)
+                    }
+                    Tab.MODULES -> {
+                        val vm: ModuleViewModel = viewModel(factory = VMFactory)
+                        LaunchedEffect(Unit) { vm.startLoading() }
+                        CollectNavEvents(vm, navigator)
+                        ModuleScreen(vm)
+                    }
+                    Tab.SETTINGS -> {
+                        val activity = LocalActivity.current as MainActivity
+                        val vm: SettingsViewModel = viewModel(factory = VMFactory)
+                        LaunchedEffect(Unit) {
+                            vm.authenticate = { onSuccess ->
+                                activity.extension.withAuthentication { if (it) onSuccess() }
+                            }
+                        }
+                        CollectNavEvents(vm, navigator)
+                        SettingsScreen(vm)
+                    }
                 }
             }
-        }
 
-        FloatingNavigationBar(
-            pagerState = pagerState,
-            visibleTabs = visibleTabs,
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
+            FloatingNavigationBar(
+                pagerState = pagerState,
+                visibleTabs = visibleTabs,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
+        }
     }
 }
 
@@ -170,7 +180,7 @@ private fun FloatingNavigationBar(
             .clip(shape)
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .fillMaxWidth()
-            .height(64.dp)
+            .height(ThemeState.navHeight.dp)
             .padding(horizontal = 4.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
@@ -225,11 +235,13 @@ private fun FloatingNavItem(
             modifier = Modifier.size(24.dp),
             tint = contentColor,
         )
-        Spacer(Modifier.height(2.dp))
-        Text(
-            text = label,
-            fontSize = 11.sp,
-            color = contentColor,
-        )
+        if (ThemeState.navLabels) {
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = label,
+                fontSize = 11.sp,
+                color = contentColor,
+            )
+        }
     }
 }
