@@ -24,11 +24,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -145,9 +144,9 @@ fun MagiskTheme(
         }
     }
 
-    val blurPx = with(density) { spec.blurRadiusDp.dp.toPx() }
     val imageModifier =
-        if (realBlur) Modifier.fillMaxSize().renderBlur(blurPx) else Modifier.fillMaxSize()
+        if (realBlur) Modifier.fillMaxSize().blur(spec.blurRadiusDp.dp, TileMode.Clamp)
+        else Modifier.fillMaxSize()
 
     val scaledDensity = remember(density, ThemeState.fontScale) {
         Density(
@@ -183,15 +182,6 @@ fun MagiskTheme(
             }
         }
     )
-}
-
-/**
- * Blurs this layer at render time. Only ever called when the platform supports [RenderEffect],
- * which is why the API level check lives at the call site.
- */
-@Suppress("NewApi")
-private fun Modifier.renderBlur(radiusPx: Float): Modifier = graphicsLayer {
-    renderEffect = RenderEffect.createBlurEffect(radiusPx, radiusPx, TileMode.Clamp)
 }
 
 /**
