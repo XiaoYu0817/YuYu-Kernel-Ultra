@@ -130,10 +130,11 @@
 
     <!--Liquid glass-->
     <string name="settings_glass_title">液态玻璃</string>
-    <string name="settings_glass_summary">卡片与底部导航栏的玻璃风格</string>
-    <string name="settings_glass_off">关闭</string>
-    <string name="settings_glass_gradient">半透明渐变</string>
-    <string name="settings_glass_blur">毛玻璃（模糊背景）</string>
+    <string name="settings_glass_summary">卡片、底部导航栏与应用栏的玻璃效果</string>
+    <string name="settings_glass_style">玻璃风格</string>
+    <string name="settings_glass_apple">苹果风格</string>
+    <string name="settings_glass_android12">安卓 12+（实时模糊）</string>
+    <string name="settings_glass_legacy">低版本安卓（伪模糊）</string>
 
     <!--Developer options-->
     <string name="settings_developer_section">开发者</string>
@@ -149,10 +150,6 @@
     <string name="dev_default">默认</string>
     <string name="dev_card_radius">卡片圆角</string>
     <string name="dev_font_scale">字体缩放</string>
-    <string name="dev_glass_alpha_dark">玻璃不透明度（深色）</string>
-    <string name="dev_glass_alpha_light">玻璃不透明度（浅色）</string>
-    <string name="dev_scrim_dark">背景压暗（深色）</string>
-    <string name="dev_scrim_light">背景压暗（浅色）</string>
     <string name="dev_navigation">底部导航栏</string>
     <string name="dev_nav_height">栏高度</string>
     <string name="dev_nav_labels">显示文字</string>

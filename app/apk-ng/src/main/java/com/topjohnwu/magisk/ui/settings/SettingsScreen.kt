@@ -1,4 +1,4 @@
-﻿package com.topjohnwu.magisk.ui.settings
+package com.topjohnwu.magisk.ui.settings
 
 import android.content.Intent
 import android.os.Build
@@ -142,6 +142,39 @@ private fun CustomizationSection(viewModel: SettingsViewModel) {
             }
         )
 
+        // Liquid Glass
+        var glassEnabled by remember { mutableStateOf(ThemeState.glassEnabled) }
+        SettingsSwitch(
+            title = stringResource(CoreR.string.settings_glass_title),
+            summary = stringResource(CoreR.string.settings_glass_summary),
+            checked = glassEnabled,
+            onCheckedChange = {
+                glassEnabled = it
+                Config.glassEnabled = it
+                ThemeState.glassEnabled = it
+            }
+        )
+        val glassStyleNames = listOf(
+            stringResource(CoreR.string.settings_glass_apple),
+            stringResource(CoreR.string.settings_glass_android12),
+            stringResource(CoreR.string.settings_glass_legacy)
+        )
+        var glassStyle by remember { mutableIntStateOf(ThemeState.glassStyle) }
+        SettingsDropdown(
+            title = stringResource(CoreR.string.settings_glass_style),
+            items = glassStyleNames,
+            selectedIndex = glassStyle,
+            enabled = glassEnabled,
+            disabledIndices = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                setOf(Config.Value.GLASS_ANDROID12)
+            } else emptySet(),
+            onSelectedIndexChange = { index ->
+                glassStyle = index
+                Config.glassStyle = index
+                ThemeState.glassStyle = index
+            }
+        )
+
         // Custom Background
         var backgroundUri by remember { mutableStateOf(Config.backgroundImage) }
         val backgroundPicker = rememberLauncherForActivityResult(
@@ -251,24 +284,6 @@ private fun AppSettingsSection() {
             onCheckedChange = { newValue ->
                 checkUpdate = newValue
                 Config.checkUpdate = newValue
-            }
-        )
-
-        // YuYu Glass Effect
-        var glassMode by remember { mutableIntStateOf(ThemeState.glassMode) }
-        SettingsDropdown(
-            title = stringResource(CoreR.string.settings_glass_title),
-            summary = stringResource(CoreR.string.settings_glass_summary),
-            items = listOf(
-                stringResource(CoreR.string.settings_glass_off),
-                stringResource(CoreR.string.settings_glass_gradient),
-                stringResource(CoreR.string.settings_glass_blur)
-            ),
-            selectedIndex = glassMode,
-            onSelectedIndexChange = { index ->
-                glassMode = index
-                Config.glassMode = index
-                ThemeState.glassMode = index
             }
         )
 

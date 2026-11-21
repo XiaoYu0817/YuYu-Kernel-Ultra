@@ -46,7 +46,8 @@ object Config : PreferenceConfig, DBConfig {
         const val ASKED_HOME = "asked_home"
         const val DOH = "doh"
         const val RAND_NAME = "rand_name"
-        const val YUYU_GLASS_MODE = "yuyu_glass_mode"
+        const val YUYU_GLASS_ENABLED = "yuyu_glass_enabled"
+        const val YUYU_GLASS_STYLE = "yuyu_glass_style"
         const val YUYU_AGREEMENT = "yuyu_user_agreement"
         const val YUYU_BACKGROUND = "yuyu_background_image"
 
@@ -54,19 +55,14 @@ object Config : PreferenceConfig, DBConfig {
         const val DEV_CARD_RADIUS = "dev_card_radius"
         const val DEV_FONT_SCALE = "dev_font_scale"
         const val DEV_PRIMARY_COLOR = "dev_primary_color"
-        const val DEV_GLASS_ALPHA_DARK = "dev_glass_alpha_dark"
-        const val DEV_GLASS_ALPHA_LIGHT = "dev_glass_alpha_light"
-        const val DEV_SCRIM_DARK = "dev_scrim_dark"
-        const val DEV_SCRIM_LIGHT = "dev_scrim_light"
         const val DEV_NAV_HEIGHT = "dev_nav_height"
         const val DEV_NAV_LABELS = "dev_nav_labels"
         const val DEV_NAV_ORDER = "dev_nav_order"
 
         val NO_MIGRATION = setOf(ASKED_HOME, SU_REQUEST_TIMEOUT,
-            SU_AUTO_RESPONSE, SU_REAUTH, SU_TAPJACK, YUYU_AGREEMENT, YUYU_GLASS_MODE, YUYU_BACKGROUND,
-            DEV_CARD_RADIUS, DEV_FONT_SCALE, DEV_PRIMARY_COLOR, DEV_GLASS_ALPHA_DARK,
-            DEV_GLASS_ALPHA_LIGHT, DEV_SCRIM_DARK, DEV_SCRIM_LIGHT, DEV_NAV_HEIGHT,
-            DEV_NAV_LABELS, DEV_NAV_ORDER)
+            SU_AUTO_RESPONSE, SU_REAUTH, SU_TAPJACK, YUYU_AGREEMENT, YUYU_GLASS_ENABLED,
+            YUYU_GLASS_STYLE, YUYU_BACKGROUND, DEV_CARD_RADIUS, DEV_FONT_SCALE,
+            DEV_PRIMARY_COLOR, DEV_NAV_HEIGHT, DEV_NAV_LABELS, DEV_NAV_ORDER)
     }
 
     object OldValue {
@@ -87,10 +83,10 @@ object Config : PreferenceConfig, DBConfig {
         const val DEBUG_CHANNEL = 2
         const val CUSTOM_CHANNEL = 3
 
-        // glass effect modes
-        const val GLASS_NONE = 0
-        const val GLASS_GRADIENT = 1
-        const val GLASS_BLUR = 2
+        // liquid glass styles
+        const val GLASS_APPLE = 0
+        const val GLASS_ANDROID12 = 1
+        const val GLASS_LEGACY = 2
 
         // root access mode
         const val ROOT_ACCESS_DISABLED = 0
@@ -134,7 +130,8 @@ object Config : PreferenceConfig, DBConfig {
     var darkTheme by preference(Key.DARK_THEME, -1)
     var themeOrdinal by preference(Key.THEME_ORDINAL, 0)
     var colorMode by preference(Key.COLOR_MODE, 0)
-    var glassMode by preference(Key.YUYU_GLASS_MODE, Value.GLASS_NONE)
+    var glassEnabled by preference(Key.YUYU_GLASS_ENABLED, true)
+    var glassStyle by preference(Key.YUYU_GLASS_STYLE, Value.GLASS_APPLE)
     var yuyuAgreementAccepted by preference(Key.YUYU_AGREEMENT, false)
     var backgroundImage by preference(Key.YUYU_BACKGROUND, "")
 
@@ -142,10 +139,6 @@ object Config : PreferenceConfig, DBConfig {
     var devCardRadius by preference(Key.DEV_CARD_RADIUS, 24)
     var devFontScale by preference(Key.DEV_FONT_SCALE, 100)
     var devPrimaryColor by preference(Key.DEV_PRIMARY_COLOR, 0)
-    var devGlassAlphaDark by preference(Key.DEV_GLASS_ALPHA_DARK, 55)
-    var devGlassAlphaLight by preference(Key.DEV_GLASS_ALPHA_LIGHT, 80)
-    var devScrimDark by preference(Key.DEV_SCRIM_DARK, 35)
-    var devScrimLight by preference(Key.DEV_SCRIM_LIGHT, 10)
     var devNavHeight by preference(Key.DEV_NAV_HEIGHT, 64)
     var devNavLabels by preference(Key.DEV_NAV_LABELS, true)
     var devNavOrder by preference(Key.DEV_NAV_ORDER, "")

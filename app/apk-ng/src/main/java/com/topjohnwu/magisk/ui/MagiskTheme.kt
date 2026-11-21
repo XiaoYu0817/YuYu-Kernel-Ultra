@@ -3,6 +3,8 @@ package com.topjohnwu.magisk.ui
 import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.RenderEffect
+import android.graphics.Shader
 import android.net.Uri
 import android.os.Build
 import androidx.compose.foundation.Image
@@ -25,20 +27,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import com.topjohnwu.magisk.core.Config
-import com.topjohnwu.magisk.core.Config.Value.GLASS_BLUR
-import com.topjohnwu.magisk.core.Config.Value.GLASS_NONE
-import com.topjohnwu.magisk.ui.component.GlassBackdrop
-import com.topjohnwu.magisk.ui.component.LocalGlassBackdrop
+import com.topjohnwu.magisk.core.Config.Value.GLASS_LEGACY
+import com.topjohnwu.magisk.ui.component.glassSpec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.math.max
@@ -47,28 +46,22 @@ val YuYuThemeBlue = Color(0xFF91D5FF)
 
 object ThemeState {
     var colorMode by mutableIntStateOf(Config.colorMode)
-    var glassMode by mutableIntStateOf(Config.glassMode)
+    var glassEnabled by mutableStateOf(Config.glassEnabled)
+    var glassStyle by mutableIntStateOf(Config.glassStyle)
     var cardRadius by mutableIntStateOf(Config.devCardRadius)
     var fontScale by mutableIntStateOf(Config.devFontScale)
     var primaryColor by mutableIntStateOf(Config.devPrimaryColor)
-    var glassAlphaDark by mutableIntStateOf(Config.devGlassAlphaDark)
-    var glassAlphaLight by mutableIntStateOf(Config.devGlassAlphaLight)
-    var scrimDark by mutableIntStateOf(Config.devScrimDark)
-    var scrimLight by mutableIntStateOf(Config.devScrimLight)
     var navHeight by mutableIntStateOf(Config.devNavHeight)
     var navLabels by mutableStateOf(Config.devNavLabels)
     var navOrder by mutableStateOf(Config.devNavOrder)
 
     fun resetToDefaults() {
         colorMode = Config.colorMode
-        glassMode = Config.glassMode
+        glassEnabled = true
+        glassStyle = Config.Value.GLASS_APPLE
         cardRadius = 24
         fontScale = 100
         primaryColor = 0
-        glassAlphaDark = 55
-        glassAlphaLight = 80
-        scrimDark = 35
-        scrimLight = 10
         navHeight = 64
         navLabels = true
         navOrder = ""
@@ -81,9 +74,11 @@ fun MagiskTheme(
 ) {
     val isDark = isSystemInDarkTheme()
     val mode = ThemeState.colorMode
-    val glassMode = ThemeState.glassMode
+    val glassEnabled = ThemeState.glassEnabled
+    val spec = glassSpec(ThemeState.glassStyle)
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
+    val density = LocalDensity.current
 
     val isDarkTheme = when (mode) {
         1 -> false
@@ -110,9 +105,8 @@ fun MagiskTheme(
         )
     } else rawColorScheme
 
-    val finalColorScheme = if (glassMode != GLASS_NONE) {
-        val a = if (isDarkTheme) ThemeState.glassAlphaDark / 100f
-        else ThemeState.glassAlphaLight / 100f
+    val finalColorScheme = if (glassEnabled) {
+        val a = if (isDarkTheme) spec.surfaceDarkAlpha else spec.surfaceLightAlpha
         baseColorScheme.copy(
             surface = baseColorScheme.surface.copy(alpha = a),
             surfaceVariant = baseColorScheme.surfaceVariant.copy(alpha = a),
@@ -124,10 +118,14 @@ fun MagiskTheme(
         )
     } else baseColorScheme
 
+    // Real blur needs the render-time blur effect, the legacy style always uses the software blur
+    val realBlur = glassEnabled && ThemeState.glassStyle != GLASS_LEGACY &&
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val pseudoBlur = glassEnabled && !realBlur
+
     val bgUri = Config.backgroundImage
     var background by remember(bgUri) { mutableStateOf<Bitmap?>(null) }
-    var backdrop by remember(bgUri, glassMode) { mutableStateOf<ImageBitmap?>(null) }
-    var rootSize by remember { mutableStateOf(IntSize.Zero) }
+    var blurredBackground by remember { mutableStateOf<Bitmap?>(null) }
 
     LaunchedEffect(bgUri) {
         background = if (bgUri.isBlank()) null else withContext(Dispatchers.IO) {
@@ -140,18 +138,21 @@ fun MagiskTheme(
         }
     }
 
-    LaunchedEffect(background, glassMode) {
+    LaunchedEffect(background, pseudoBlur) {
         val src = background
-        backdrop = if (glassMode != GLASS_BLUR || src == null) null else withContext(Dispatchers.IO) {
-            blurBitmap(src).asImageBitmap()
+        blurredBackground = if (!pseudoBlur || src == null) null else withContext(Dispatchers.IO) {
+            blurBitmap(src)
         }
     }
 
-    val baseDensity = LocalDensity.current
-    val scaledDensity = remember(baseDensity, ThemeState.fontScale) {
+    val blurPx = with(density) { spec.blurRadiusDp.dp.toPx() }
+    val imageModifier =
+        if (realBlur) Modifier.fillMaxSize().renderBlur(blurPx) else Modifier.fillMaxSize()
+
+    val scaledDensity = remember(density, ThemeState.fontScale) {
         Density(
-            density = baseDensity.density,
-            fontScale = baseDensity.fontScale * (ThemeState.fontScale / 100f)
+            density = density.density,
+            fontScale = density.fontScale * (ThemeState.fontScale / 100f)
         )
     }
 
@@ -159,38 +160,25 @@ fun MagiskTheme(
         colorScheme = finalColorScheme,
         content = {
             CompositionLocalProvider(LocalDensity provides scaledDensity) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .onGloballyPositioned { rootSize = it.size }
-                ) {
-                    val bmp = background
+                Box(modifier = Modifier.fillMaxSize()) {
+                    val bmp = blurredBackground ?: background
                     if (bmp != null) {
                         Image(
                             bitmap = bmp.asImageBitmap(),
                             contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = imageModifier,
                             contentScale = ContentScale.Crop
                         )
-                        // Scrim to keep content readable regardless of the image brightness
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(
-                                    Color.Black.copy(
-                                        alpha = (if (isDarkTheme) ThemeState.scrimDark
-                                        else ThemeState.scrimLight) / 100f
-                                    )
-                                )
-                        )
+                        if (glassEnabled) {
+                            // Scrim to keep content readable regardless of the image brightness
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = spec.scrimAlpha))
+                            )
+                        }
                     }
-                    val currentBackdrop = backdrop
-                    CompositionLocalProvider(
-                        LocalGlassBackdrop provides if (currentBackdrop == null) null
-                        else GlassBackdrop(currentBackdrop, rootSize.width, rootSize.height)
-                    ) {
-                        content()
-                    }
+                    content()
                 }
             }
         }
@@ -198,8 +186,17 @@ fun MagiskTheme(
 }
 
 /**
+ * Blurs this layer at render time. Only ever called when the platform supports [RenderEffect],
+ * which is why the API level check lives at the call site.
+ */
+@Suppress("NewApi")
+private fun Modifier.renderBlur(radiusPx: Float): Modifier = graphicsLayer {
+    renderEffect = RenderEffect.createBlurEffect(radiusPx, radiusPx, Shader.TileMode.CLAMP)
+}
+
+/**
  * Cheap pseudo blur: downscale, then upscale back while keeping the aspect ratio.
- * Works on every API level, so the blur mode is not limited to Android 12+.
+ * Works on every API level, so the legacy glass style is not limited to Android 12+.
  */
 private fun blurBitmap(src: Bitmap): Bitmap {
     val smallWidth = max(1, src.width / 12)
