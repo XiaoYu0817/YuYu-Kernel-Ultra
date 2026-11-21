@@ -62,6 +62,7 @@ fun SettingsDropdown(
     items: List<String>,
     selectedIndex: Int,
     enabled: Boolean = true,
+    disabledIndices: Set<Int> = emptySet(),
     onSelectedIndexChange: (Int) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -82,6 +83,7 @@ fun SettingsDropdown(
             items.forEachIndexed { index, item ->
                 DropdownMenuItem(
                     text = { Text(item) },
+                    enabled = index !in disabledIndices,
                     onClick = {
                         onSelectedIndexChange(index)
                         expanded = false

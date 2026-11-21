@@ -115,8 +115,6 @@ fun DeveloperOptionsScreen(onBack: () -> Unit) {
             ) {
                 AppearanceSection()
                 Spacer(Modifier.height(12.dp))
-                GlassSection()
-                Spacer(Modifier.height(12.dp))
                 NavigationSection()
                 Spacer(Modifier.height(12.dp))
                 ResetSection()
@@ -260,61 +258,6 @@ private fun AccentSwatch(color: Color, selected: Boolean, onClick: () -> Unit) {
             )
             .clickable(onClick = onClick)
     )
-}
-
-// --- Glass ---
-
-@Composable
-private fun GlassSection() {
-    SmallTitle(text = stringResource(CoreR.string.settings_glass_title))
-    GlassCard(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            SliderRow(
-                title = stringResource(CoreR.string.dev_glass_alpha_dark),
-                value = ThemeState.glassAlphaDark,
-                range = 0f..100f,
-                valueText = "${ThemeState.glassAlphaDark}%",
-                onChange = {
-                    Config.devGlassAlphaDark = it
-                    ThemeState.glassAlphaDark = it
-                }
-            )
-            SliderRow(
-                title = stringResource(CoreR.string.dev_glass_alpha_light),
-                value = ThemeState.glassAlphaLight,
-                range = 0f..100f,
-                valueText = "${ThemeState.glassAlphaLight}%",
-                onChange = {
-                    Config.devGlassAlphaLight = it
-                    ThemeState.glassAlphaLight = it
-                }
-            )
-            SliderRow(
-                title = stringResource(CoreR.string.dev_scrim_dark),
-                value = ThemeState.scrimDark,
-                range = 0f..100f,
-                valueText = "${ThemeState.scrimDark}%",
-                onChange = {
-                    Config.devScrimDark = it
-                    ThemeState.scrimDark = it
-                }
-            )
-            SliderRow(
-                title = stringResource(CoreR.string.dev_scrim_light),
-                value = ThemeState.scrimLight,
-                range = 0f..100f,
-                valueText = "${ThemeState.scrimLight}%",
-                onChange = {
-                    Config.devScrimLight = it
-                    ThemeState.scrimLight = it
-                }
-            )
-        }
-    }
 }
 
 // --- Navigation bar ---

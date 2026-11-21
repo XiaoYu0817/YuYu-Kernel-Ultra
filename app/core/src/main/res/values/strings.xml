@@ -86,10 +86,11 @@
 
     <!--Liquid glass-->
     <string name="settings_glass_title">Liquid glass</string>
-    <string name="settings_glass_summary">Glass style for cards and navigation bar</string>
-    <string name="settings_glass_off">Off</string>
-    <string name="settings_glass_gradient">Translucent gradient</string>
-    <string name="settings_glass_blur">Frosted glass (blurred background)</string>
+    <string name="settings_glass_summary">Glass effect for cards, navigation bar and app bars</string>
+    <string name="settings_glass_style">Glass style</string>
+    <string name="settings_glass_apple">Apple style</string>
+    <string name="settings_glass_android12">Android 12+ (real-time blur)</string>
+    <string name="settings_glass_legacy">Older Android (pseudo blur)</string>
 
     <!--Developer options-->
     <string name="settings_developer_section">Developer</string>
@@ -105,10 +106,6 @@
     <string name="dev_default">Default</string>
     <string name="dev_card_radius">Card corner radius</string>
     <string name="dev_font_scale">Font scale</string>
-    <string name="dev_glass_alpha_dark">Glass opacity (dark)</string>
-    <string name="dev_glass_alpha_light">Glass opacity (light)</string>
-    <string name="dev_scrim_dark">Background dim (dark)</string>
-    <string name="dev_scrim_light">Background dim (light)</string>
     <string name="dev_navigation">Navigation bar</string>
     <string name="dev_nav_height">Bar height</string>
     <string name="dev_nav_labels">Show labels</string>
