@@ -3,8 +3,6 @@ package com.topjohnwu.magisk.ui
 import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.RenderEffect
-import android.graphics.Shader
 import android.net.Uri
 import android.os.Build
 import androidx.compose.foundation.Image
@@ -27,6 +25,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RenderEffect
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -191,7 +191,7 @@ fun MagiskTheme(
  */
 @Suppress("NewApi")
 private fun Modifier.renderBlur(radiusPx: Float): Modifier = graphicsLayer {
-    renderEffect = RenderEffect.createBlurEffect(radiusPx, radiusPx, Shader.TileMode.CLAMP)
+    renderEffect = RenderEffect.createBlurEffect(radiusPx, radiusPx, TileMode.Clamp)
 }
 
 /**
